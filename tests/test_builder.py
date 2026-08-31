@@ -77,10 +77,10 @@ def test_map_has_osm_labels_toggle():
     assert "toggleLabels" in html
     assert "applyLabelLogic" in html
     assert "var labelsLayer" in html
-    # The Esri labels-only tile overlay is present, and the base map is the
+    # The CARTO labels-only tile overlay is present, and the base map is the
     # no-labels variant (so labels are actually toggleable)
-    assert "World_Light_Gray_Reference" in html
-    assert "World_Light_Gray_Base" in html
+    assert "light_only_labels" in html
+    assert "light_nolabels" in html
 
 
 def test_save_before_build_raises():

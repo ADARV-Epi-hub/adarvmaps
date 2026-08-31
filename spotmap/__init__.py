@@ -7,7 +7,7 @@ from .map_builder import SpotMap
 # Short, friendly alias so non-coders can simply do:  import spotmap; spotmap.run()
 run = spotmap_run
 
-__version__ = "0.1.34"
+__version__ = "0.1.35"
 __all__ = [
     "SpotMap",
     "run",  # friendly alias for spotmap_run
