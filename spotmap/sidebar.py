@@ -202,8 +202,8 @@ def build_sidebar_html(
   </div>
 
   <div class="sm-group">
-    <span class="sm-chip-label" title="Show or hide place names (states, districts, towns) from OpenStreetMap"><span class="dot"></span>Labels</span>
-    <label class="switch" title="Show or hide place names from OpenStreetMap"><input type="checkbox" id="toggleLabels"><span class="slider-toggle"></span></label>
+    <span class="sm-chip-label" title="Show or hide place names (states, districts, towns) on the map"><span class="dot"></span>Labels</span>
+    <label class="switch" title="Show or hide place names on the map"><input type="checkbox" id="toggleLabels"><span class="slider-toggle"></span></label>
     <span class="toggle-state" id="labelsState">Off</span>
   </div>
 

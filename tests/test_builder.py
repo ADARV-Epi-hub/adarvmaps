@@ -73,14 +73,14 @@ def test_map_has_osm_labels_toggle():
         "case_control": ["case", "control", "case", "control"],
     })
     html = SpotMap(df).build().map.get_root().render()
-    # Sidebar toggle + JS wiring for the OpenStreetMap labels overlay
+    # Sidebar toggle + JS wiring for the place-name labels overlay
     assert "toggleLabels" in html
     assert "applyLabelLogic" in html
     assert "var labelsLayer" in html
-    # The OSM/CARTO labels-only tile overlay is present, and the base map is
-    # the no-labels variant (so labels are actually toggleable)
-    assert "light_only_labels" in html
-    assert "light_nolabels" in html
+    # The Esri labels-only tile overlay is present, and the base map is the
+    # no-labels variant (so labels are actually toggleable)
+    assert "World_Light_Gray_Reference" in html
+    assert "World_Light_Gray_Base" in html
 
 
 def test_save_before_build_raises():

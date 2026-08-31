@@ -153,34 +153,48 @@ def add_marker_layers(
     return cluster, pins_cases_layer, pins_controls_layer
 
 
-_CARTO_NOLABELS = "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
-_CARTO_ONLYLABELS = "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
-_CARTO_ATTR = (
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-    'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+# Esri "World Light Gray Canvas" tiles: a clean light-gray base with a
+# separate, transparent labels-only ("Reference") layer, so place names can
+# be toggled independently.  These tiles are served without an API key
+# (unlike CARTO's basemaps, which now watermark keyless requests).
+_ESRI_NOLABELS = (
+    "https://server.arcgisonline.com/ArcGIS/rest/services/"
+    "Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
 )
+_ESRI_ONLYLABELS = (
+    "https://server.arcgisonline.com/ArcGIS/rest/services/"
+    "Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+)
+_ESRI_ATTR = (
+    'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, '
+    'Garmin, &copy; OpenStreetMap contributors, and the GIS user community'
+)
+
+# Esri's Light Gray tiles are only rendered natively up to zoom 16; beyond
+# that Leaflet upscales the z16 tile, so the map never shows blank tiles.
+_ESRI_MAX_NATIVE_ZOOM = 16
 
 
 def add_base_map(m: folium.Map) -> None:
     """Add a clean, label-free base map so place labels can be toggled.
 
-    Rendered by CARTO from OpenStreetMap data.
+    Rendered by Esri (World Light Gray Canvas), served without an API key.
     """
     folium.TileLayer(
-        tiles=_CARTO_NOLABELS,
-        attr=_CARTO_ATTR,
+        tiles=_ESRI_NOLABELS,
+        attr=_ESRI_ATTR,
         name="Base Map",
         control=False,
-        subdomains="abcd",
-        max_zoom=20,
+        max_native_zoom=_ESRI_MAX_NATIVE_ZOOM,
+        max_zoom=25,
     ).add_to(m)
 
 
 def add_osm_labels_overlay(m: folium.Map):
-    """Add a toggleable place-name labels overlay sourced from OpenStreetMap.
+    """Add a toggleable place-name labels overlay.
 
     These are transparent, labels-only tiles (state / district / city / town
-    names, rendered by CARTO from OpenStreetMap data) drawn on top of the
+    names, from Esri's World Light Gray Reference layer) drawn on top of the
     no-labels base map.  Names appear automatically by zoom level — no
     shapefile attributes are used.  The returned layer is switched on/off
     from the sidebar; it starts hidden (the sidebar JS removes it on load).
@@ -189,13 +203,13 @@ def add_osm_labels_overlay(m: folium.Map):
         the labels TileLayer
     """
     labels = folium.TileLayer(
-        tiles=_CARTO_ONLYLABELS,
-        attr=_CARTO_ATTR,
-        name="Place Labels (OpenStreetMap)",
+        tiles=_ESRI_ONLYLABELS,
+        attr=_ESRI_ATTR,
+        name="Place Labels",
         overlay=True,
         control=False,
-        subdomains="abcd",
-        max_zoom=20,
+        max_native_zoom=_ESRI_MAX_NATIVE_ZOOM,
+        max_zoom=25,
     )
     labels.add_to(m)
     return labels
