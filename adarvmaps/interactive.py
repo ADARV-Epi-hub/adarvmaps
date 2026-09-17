@@ -1,8 +1,8 @@
 """Interactive prompt-based wrapper for non-coders.
 
 Usage:
-    from spotmap import spotmap_run
-    spotmap_run()
+    from adarvmaps import adarvmaps_run
+    adarvmaps_run()
 """
 
 import os
@@ -12,7 +12,7 @@ from pathlib import Path
 import pandas as pd
 
 from .exceptions import NoCasePointsError, ColumnNotFoundError
-from .map_builder import SpotMap
+from .map_builder import AdarvMaps
 
 
 # =========================================================
@@ -438,7 +438,7 @@ def _step_output_path() -> str:
     while True:
         path = _ask(
             "\n💾 Where to save the map (HTML file)",
-            default="spotmap_output.html",
+            default="adarvmaps_output.html",
         )
         if not path.lower().endswith(".html"):
             path += ".html"
@@ -477,7 +477,7 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
     print("\n⚙️  Building the map...")
     all_cases = outcome_col == _NO_OUTCOME
     try:
-        sm = SpotMap(
+        sm = AdarvMaps(
             df,
             lat_col=lat_col,
             long_col=long_col,
@@ -511,7 +511,7 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
     except Exception as e:  # noqa: BLE001
         _err(f"Something went wrong: {e}")
         _info("If this keeps happening, report it at:")
-        _info("  https://github.com/ADARV-Epi-hub/spotmap/issues")
+        _info("  https://github.com/ADARV-Epi-hub/adarvmaps/issues")
     return False
 
 
@@ -519,11 +519,11 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
 # MAIN ENTRY POINT
 # =========================================================
 
-_DEFAULT_OUTPUT = "spotmap.html"
+_DEFAULT_OUTPUT = "adarvmaps.html"
 
 
-def spotmap_run(output_path: str = _DEFAULT_OUTPUT) -> None:
-    """Run an interactive prompt-based wizard to build a SpotMap.
+def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
+    """Run an interactive prompt-based wizard to build a AdarvMaps.
 
     Designed for users who don't want to write Python code.  Each step
     catches errors and lets the user retry instead of crashing.
@@ -531,12 +531,12 @@ def spotmap_run(output_path: str = _DEFAULT_OUTPUT) -> None:
     Parameters
     ----------
     output_path:
-        Where to save the HTML map.  Defaults to ``spotmap.html`` in the
+        Where to save the HTML map.  Defaults to ``adarvmaps.html`` in the
         current directory.
     """
     print()
     _line("═")
-    print("   🗺️  Welcome to SpotMap  (by ADARV)")
+    print("   🗺️  Welcome to AdarvMaps  (by ADARV)")
     print("   Let's turn your data into an interactive map — no coding needed.")
     print("   Just answer a few quick questions below.")
     _line("═")
@@ -598,16 +598,16 @@ def spotmap_run(output_path: str = _DEFAULT_OUTPUT) -> None:
 
 
 def run_interactive(output_path: str = _DEFAULT_OUTPUT) -> None:
-    """Deprecated alias for :func:`spotmap_run`.
+    """Deprecated alias for :func:`adarvmaps_run`.
 
     .. deprecated:: 0.1.11
-       Use :func:`spotmap_run` instead. ``run_interactive`` will be removed
+       Use :func:`adarvmaps_run` instead. ``run_interactive`` will be removed
        in a future release.
     """
     warnings.warn(
-        "run_interactive() is deprecated; use spotmap_run() instead. "
+        "run_interactive() is deprecated; use adarvmaps_run() instead. "
         "run_interactive will be removed in a future release.",
         DeprecationWarning,
         stacklevel=2,
     )
-    return spotmap_run(output_path=output_path)
+    return adarvmaps_run(output_path=output_path)

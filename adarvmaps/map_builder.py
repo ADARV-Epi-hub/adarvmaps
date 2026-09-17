@@ -1,4 +1,4 @@
-"""Main SpotMap class — orchestrates loading, spatial join, and map building."""
+"""Main AdarvMaps class — orchestrates loading, spatial join, and map building."""
 
 import folium
 import pandas as pd
@@ -25,7 +25,7 @@ _DEFAULT_CASE_COLOR = "#D55757"
 _DEFAULT_CONTROL_COLOR = "#7676E7"
 
 
-class SpotMap:
+class AdarvMaps:
     """Build an interactive epidemiological spot map for India.
 
     Parameters
@@ -118,10 +118,10 @@ class SpotMap:
     # Public API
     # ------------------------------------------------------------------
 
-    def build(self) -> "SpotMap":
+    def build(self) -> "AdarvMaps":
         """Run the full pipeline and store the Folium map internally.
 
-        Returns *self* so calls can be chained: ``SpotMap(...).build().save(...)``.
+        Returns *self* so calls can be chained: ``AdarvMaps(...).build().save(...)``.
         """
         # 1. Load data (path or DataFrame)
         df, lat_col, long_col, outcome_col, case_value = load_csv(
@@ -145,7 +145,7 @@ class SpotMap:
         )
 
         # 4. Split cases / controls
-        mask = points_joined["_spotmap_outcome_norm"] == case_value
+        mask = points_joined["_adarvmaps_outcome_norm"] == case_value
         points_cases = points_joined[mask].copy()
         points_controls = points_joined[~mask].copy()
 
@@ -250,7 +250,7 @@ class SpotMap:
         self._map = m
         return self
 
-    def save(self, output_path: str) -> "SpotMap":
+    def save(self, output_path: str) -> "AdarvMaps":
         """Save the built map to an HTML file."""
         if self._map is None:
             raise RuntimeError("Call .build() before .save().")

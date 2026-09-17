@@ -415,7 +415,7 @@ window.addEventListener('load', function() {{
       simpleMapScreenshoter.takeScreen('blob', {{ caption: function() {{ return ''; }} }})
         .then(function(blob) {{
           var link = document.createElement('a');
-          link.download = 'spotmap.png';
+          link.download = 'adarvmaps.png';
           link.href = URL.createObjectURL(blob);
           link.click();
         }})

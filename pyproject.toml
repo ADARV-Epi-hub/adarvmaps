@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "spotmap"
+name = "adarvmaps"
 version = "0.1.36"
 description = "Interactive epidemiological spot maps for India"
 readme = "README.md"
@@ -44,15 +44,15 @@ dependencies = [
 test = ["pytest>=7"]
 
 [project.urls]
-Homepage = "https://github.com/ADARV-Epi-hub/spotmap"
-Repository = "https://github.com/ADARV-Epi-hub/spotmap"
-"Bug Tracker" = "https://github.com/ADARV-Epi-hub/spotmap/issues"
+Homepage = "https://github.com/ADARV-Epi-hub/adarvmaps"
+Repository = "https://github.com/ADARV-Epi-hub/adarvmaps"
+"Bug Tracker" = "https://github.com/ADARV-Epi-hub/adarvmaps/issues"
 
 [project.scripts]
-spotmap = "spotmap.cli:main"
+adarvmaps = "adarvmaps.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["spotmap"]
+packages = ["adarvmaps"]
 
 [tool.hatch.build.targets.sdist]
-include = ["spotmap/", "README.md", "LICENSE", "pyproject.toml"]
+include = ["adarvmaps/", "README.md", "LICENSE", "pyproject.toml"]

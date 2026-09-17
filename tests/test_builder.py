@@ -1,4 +1,4 @@
-"""Integration tests for the full SpotMap build pipeline.
+"""Integration tests for the full AdarvMaps build pipeline.
 
 Mirrors the R package's tests/testthat/test-spot-map.R. These exercise the
 spatial join against the bundled boundary files, so they require the optional
@@ -11,8 +11,8 @@ import pytest
 pytest.importorskip("geopandas")
 pytest.importorskip("folium")
 
-from spotmap import SpotMap  # noqa: E402
-from spotmap.exceptions import ColumnNotFoundError  # noqa: E402
+from adarvmaps import AdarvMaps  # noqa: E402
+from adarvmaps.exceptions import ColumnNotFoundError  # noqa: E402
 
 
 def test_all_cases_builds_a_map(tmp_path):
@@ -23,7 +23,7 @@ def test_all_cases_builds_a_map(tmp_path):
         "lon": [76.9, 77.0, 77.1, 77.05],
     })
     out = tmp_path / "map.html"
-    SpotMap(df, all_cases=True).build().save(str(out))
+    AdarvMaps(df, all_cases=True).build().save(str(out))
     assert out.exists()
 
 
@@ -34,13 +34,13 @@ def test_missing_outcome_column_errors_clearly():
         "lon": [76.9, 77.0],
     })
     with pytest.raises(ColumnNotFoundError, match="Could not find outcome column"):
-        SpotMap(df).build()
+        AdarvMaps(df).build()
 
 
 def test_empty_dataframe_errors_clearly():
     df = pd.DataFrame({"lat": [], "lon": [], "case_control": []})
     with pytest.raises(ValueError, match="empty"):
-        SpotMap(df).build()
+        AdarvMaps(df).build()
 
 
 def test_na_coordinates_dropped_with_warning(tmp_path):
@@ -51,7 +51,7 @@ def test_na_coordinates_dropped_with_warning(tmp_path):
     })
     out = tmp_path / "map.html"
     with pytest.warns(UserWarning, match="missing or out-of-range"):
-        SpotMap(df).build().save(str(out))
+        AdarvMaps(df).build().save(str(out))
     assert out.exists()
 
 
@@ -62,7 +62,7 @@ def test_normal_case_control_builds(tmp_path):
         "case_control": ["case", "control", "case"],
     })
     out = tmp_path / "map.html"
-    SpotMap(df).build().save(str(out))
+    AdarvMaps(df).build().save(str(out))
     assert out.exists()
 
 
@@ -72,7 +72,7 @@ def test_map_has_osm_labels_toggle():
         "lon": [76.9, 77.0, 77.2, 77.3],
         "case_control": ["case", "control", "case", "control"],
     })
-    html = SpotMap(df).build().map.get_root().render()
+    html = AdarvMaps(df).build().map.get_root().render()
     # Sidebar toggle + JS wiring for the place-name labels overlay
     assert "toggleLabels" in html
     assert "applyLabelLogic" in html
@@ -88,4 +88,4 @@ def test_save_before_build_raises():
         "lat": [11.0], "lon": [76.9], "case_control": ["case"],
     })
     with pytest.raises(RuntimeError, match="build"):
-        SpotMap(df).save("nope.html")
+        AdarvMaps(df).save("nope.html")

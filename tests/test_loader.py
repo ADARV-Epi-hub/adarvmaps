@@ -1,4 +1,4 @@
-"""Unit tests for column/value detection in spotmap.loader.
+"""Unit tests for column/value detection in adarvmaps.loader.
 
 Mirrors the R package's tests/testthat/test-loader.R so the two
 implementations stay in sync.
@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from spotmap.exceptions import ColumnNotFoundError
-from spotmap.loader import detect_lat_lon, detect_outcome, load_csv
+from adarvmaps.exceptions import ColumnNotFoundError
+from adarvmaps.loader import detect_lat_lon, detect_outcome, load_csv
 
 
 # ---------------------------------------------------------------------------
@@ -42,12 +42,12 @@ def test_detect_lat_lon_errors_on_missing_explicit_columns():
 def test_detect_lat_lon_splits_combined_column():
     df = pd.DataFrame({"coords": ["28.6, 77.2", "19.0, 72.8"]})
     lat, lon = detect_lat_lon(df)
-    assert lat == "_spotmap_auto_lat"
-    assert lon == "_spotmap_auto_lon"
-    assert "_spotmap_auto_lat" in df.columns
-    assert "_spotmap_auto_lon" in df.columns
-    np.testing.assert_allclose(df["_spotmap_auto_lat"].tolist(), [28.6, 19.0])
-    np.testing.assert_allclose(df["_spotmap_auto_lon"].tolist(), [77.2, 72.8])
+    assert lat == "_adarvmaps_auto_lat"
+    assert lon == "_adarvmaps_auto_lon"
+    assert "_adarvmaps_auto_lat" in df.columns
+    assert "_adarvmaps_auto_lon" in df.columns
+    np.testing.assert_allclose(df["_adarvmaps_auto_lat"].tolist(), [28.6, 19.0])
+    np.testing.assert_allclose(df["_adarvmaps_auto_lon"].tolist(), [77.2, 72.8])
 
 
 def test_detect_lat_lon_accepts_scientific_notation():
@@ -153,4 +153,4 @@ def test_load_csv_all_cases_skips_outcome_detection():
         df, all_cases=True
     )
     assert case_value == "case"
-    assert (out_df["_spotmap_outcome_norm"] == "case").all()
+    assert (out_df["_adarvmaps_outcome_norm"] == "case").all()

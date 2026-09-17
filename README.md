@@ -1,21 +1,32 @@
-# SpotMap
+# AdarvMaps
 
 **Interactive epidemiological spot maps for India — no GIS software, no shapefiles, no setup.**
 
-[![PyPI version](https://img.shields.io/pypi/v/spotmap.svg)](https://pypi.org/project/spotmap/)
-[![Python versions](https://img.shields.io/pypi/pyversions/spotmap.svg)](https://pypi.org/project/spotmap/)
-[![License: MIT](https://img.shields.io/pypi/l/spotmap.svg)](https://github.com/ADARV-Epi-hub/spotmap/blob/main/LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/adarvmaps.svg)](https://pypi.org/project/adarvmaps/)
+[![Python versions](https://img.shields.io/pypi/pyversions/adarvmaps.svg)](https://pypi.org/project/adarvmaps/)
+[![License: MIT](https://img.shields.io/pypi/l/adarvmaps.svg)](https://github.com/ADARV-Epi-hub/adarvmaps/blob/main/LICENSE)
 
-SpotMap turns a spreadsheet of case/control coordinates into a polished, interactive
-HTML map you can open in any browser or drop straight into a report. India's state and
-district boundaries are built in — you don't download or configure anything.
+AdarvMaps turns a spreadsheet of latitude and longitude from the field into a polished,
+interactive HTML map. You can open the map in any browser, make edits, and download it as
+a **PNG** image or **PDF**. India's state and district boundaries are already built in, so
+you don't have to search for shapefiles.
 
-- 📍 **Spot pins** for individual cases and controls, in colours you choose
-- 🔴 **Dot-density** clustering to spot hotspots at a glance
+- 📍 **Spot maps** — show the location of individual people or events
+- 🔴 **Dot-density maps** — aggregate nearby points to show clustering of cases
 - 🗺️ Built-in **state & district boundaries** — nothing to download
-- 🏷️ Toggle place-name labels, resize pins, and switch modes live
-- 💾 Export the finished map to **PNG** or **PDF**
+- 🎨 Recolour and resize markers, toggle place-name labels, export to PNG / PDF
 - 🤖 **Auto-detects** your latitude / longitude / outcome columns
+
+---
+
+## What will AdarvMaps do?
+
+AdarvMaps turns your spreadsheet into an interactive map. It automatically places every
+row as a **dot** at its location, draws the correct **state and district boundaries**, and
+colours the groups (e.g. cases and controls) differently. It then generates a single,
+self-contained **HTML** file you can open in any browser to fine-tune your map — and you
+can download it as a PNG or PDF, or email it to a colleague. You may also aggregate the
+dots to switch from a spot map to a **dot-density** map.
 
 ---
 
@@ -26,29 +37,83 @@ district boundaries are built in — you don't download or configure anything.
 | 🙋 **"I just want a map — I don't write code."** | → [Guide for non-coders](#guide-for-non-coders) |
 | 👩‍💻 **"I write Python and want the API / command line."** | → [Guide for developers](#guide-for-developers) |
 
+Everyone should also read [Preparing your data](#preparing-your-data) first.
+
+---
+
+## Preparing your data
+
+Each **row** in your spreadsheet should be **one person or event**, and each row should
+carry its **location** (latitude and longitude) in separate columns. You may also include
+an extra column that splits the data into groups (e.g. case / control) if you want to show
+both on the same map.
+
 ---
 
 ## Guide for non-coders
 
-**You don't need to install anything on your computer.** The easiest way is
-**Google Colab** — a free notebook that runs in your web browser.
+This guide is for anyone who wants a map but has never written any code. You don't need to
+install anything on your computer. You'll copy and paste two lines of template code, and
+then AdarvMaps will guide you through the rest with a few plain-English questions.
 
-**Step 1** — Open **[colab.research.google.com](https://colab.research.google.com)** and click **New notebook**.
+### Step 1 — Open a free notebook
+Go to **[colab.research.google.com](https://colab.research.google.com)** and click
+**New notebook**. Google Colab is a free service that runs code in your web browser, so
+there's nothing to install. You'll see an empty box called a *cell*.
 
-**Step 2** — Paste these two lines into the cell and press ▶:
+### Step 2 — Start AdarvMaps
+Click inside the cell, paste the two lines below, and press the ▶ (play) button:
 ```python
-!pip install spotmap
-import spotmap; spotmap.run()
+!pip install adarvmaps
+import adarvmaps; adarvmaps.run()
 ```
+The first line installs AdarvMaps; the second starts the guided wizard. Depending on your
+internet speed, the install may take a little while.
 
-**Step 3** — Follow the simple prompts:
-1. Click the button to **upload your data file**.
-2. Confirm the **latitude**, **longitude**, and **case/control** columns SpotMap detected.
-3. Choose which value means a **"case"** (e.g. `case`, `positive`, `1`).
+### Step 3 — Answer the questions
+AdarvMaps asks **five** questions. Each shows its own best guess — press **Enter** to
+accept it, or type the number of the correct choice.
 
-Your map appears right below the cell and is saved as `spotmap.html` to download and share.
+1. **Upload your data file**
+   - In Colab (or Jupyter / VS Code) an *Upload* button appears — click it and pick your
+     spreadsheet (CSV, Excel `.xlsx` / `.xls`, or TSV).
+   - AdarvMaps prints a quick summary — the number of rows and columns, each column name
+     with an example value, and the first few rows — so you can confirm it read your file.
+   - **FAQ: Is my data uploaded to a server?** On **Colab**, yes — Colab runs on Google's
+     cloud, so your file is processed on Google's servers (see the privacy note below). If
+     your data must stay private, **run AdarvMaps locally** instead (see Guide for
+     developers) — nothing leaves your computer.
 
-> 💡 See [Preparing your data](#preparing-your-data) — any spreadsheet with location and case/control columns works.
+2. **Which column has the latitude?**
+   - Latitude is the north–south number (for example, `28.61` for Delhi).
+   - AdarvMaps pre-selects the column it thinks is latitude — press Enter to accept, or, if
+     the guess is wrong, check the summary above and type the number of the right column.
+
+3. **Which column has the longitude?**
+   - Longitude is the east–west number (for example, `77.20` for Delhi).
+   - AdarvMaps pre-selects its best guess — accept it or pick another.
+   - **Remember:** if the points later look misplaced, the most common cause is that
+     latitude and longitude are swapped.
+
+4. **Which column has the outcome?**
+   - If your spreadsheet has a variable that splits the data into *cases* and *controls*,
+     or *affected* and *not affected*, choose it here. You can equally use this to show
+     *male* / *female*, *dead* / *alive*, or *positive* / *negative* differently on the
+     map — AdarvMaps lets you name the two groups.
+   - If you don't want any split, choose the first option: *My data is all cases (no
+     control group)*.
+
+5. **Which value marks the outcome?**
+   - AdarvMaps lists the values found in the column you chose. Tell it which value is the
+     "case" (for example, if you coded `1 = Case, 0 = Control`, choose `1`).
+   - Every other value is treated as the other group.
+
+### Step 4 — Get your map
+- Your map appears right below the cell and is saved as a file called `adarvmaps.html`.
+- Download it and open it in any browser — it works on its own, no internet needed to view.
+- Using the map's sidebar you can: switch between **Spot Map** and **Dot Density**, show one
+  group or both, change colours and resize the dots, toggle **place-name labels**, and save
+  the map as a **PNG** or **PDF**.
 
 ---
 
@@ -56,47 +121,52 @@ Your map appears right below the cell and is saved as `spotmap.html` to download
 
 ### Install
 ```bash
-pip install spotmap
+pip install adarvmaps
 ```
 Python 3.9+.
 
 ### Usage
 ```python
-from spotmap import SpotMap
+from adarvmaps import AdarvMaps
 
 # `data` accepts a CSV path or a pandas DataFrame
-SpotMap("my_data.csv").build().save("map.html")
+AdarvMaps("my_data.csv").build().save("map.html")
 ```
 
 Or from the command line:
 ```bash
-spotmap my_data.csv -o map.html
+adarvmaps my_data.csv -o map.html
 ```
 
 ### Common options
-`SpotMap(data, ...)` — all options below are keyword arguments:
+`AdarvMaps(data, ...)` — all options below are keyword arguments:
 
 | Option | Default | Description |
 |---|---|---|
 | `lat_col`, `long_col`, `outcome_col` | auto | Override column auto-detection |
 | `case_value` | auto | Value in `outcome_col` that means "case" |
+| `case_label`, `control_label` | "Case" / "Control" | Names for the two groups, e.g. "Male" / "Female" |
 | `all_cases` | `False` | Treat every row as a case (no controls) |
 | `case_color`, `control_color`, `cluster_color` | ADARV palette | Marker colours (hex) |
 | `state_shp`, `district_shp` | bundled | Use your own boundary files |
 
-**Full API and CLI reference →** [DOCUMENTATION.md](https://github.com/ADARV-Epi-hub/spotmap/blob/main/DOCUMENTATION.md)
+**Full API and CLI reference →** [DOCUMENTATION.md](https://github.com/ADARV-Epi-hub/adarvmaps/blob/main/DOCUMENTATION.md)
+
+> 🔒 **Privacy:** running AdarvMaps locally keeps your data on your machine — nothing is
+> uploaded. Google Colab is convenient but runs on Google's cloud, so use it only for
+> de-identified or demo data.
 
 ---
 
-## Preparing your data
+## Preparing your data (details)
 
-SpotMap reads a CSV and **auto-detects** the columns — you don't have to rename anything.
-At a minimum it needs **location** and **outcome**:
+AdarvMaps reads a CSV and **auto-detects** the columns — you don't have to rename anything.
+At a minimum it needs **location** and, optionally, an **outcome**:
 
-| What SpotMap needs | How to provide it |
-|---|---|
-| **Coordinates** | Separate `lat` / `lon` columns **or** one combined `"lat,lon"` column |
-| **Outcome** | A column (e.g. `outcome`, `status`, `case_control`) with values like `case` / `control` |
+| What AdarvMaps needs | Possible column names | How to provide it |
+|---|---|---|
+| **Coordinates** | `lat`, `lon` (or `latitude`, `longitude`) | Separate `lat` / `lon` columns **or** one combined `"lat,lon"` column |
+| **Outcome** (optional) | `outcome`, `status`, `case_control`, `case` | A column with values like `case` / `control` |
 
 **Example:**
 ```csv
@@ -111,15 +181,14 @@ latitude,longitude,outcome
 ## What you get
 
 A single, self-contained HTML file you can open in any browser or share. Its sidebar lets
-anyone switch between **Dot Density** and **Spot Pins**, show **Cases Only** or
-**Cases & Controls**, recolour markers, resize pins, toggle **place-name labels**, and
-export to **PNG / PDF**.
+anyone switch between **Dot Density** and **Spot Pins**, show one group or both, recolour
+and resize markers, toggle **place-name labels**, and export to **PNG / PDF**.
 
 ---
 
-## Team
+## ADARV Team
 
-SpotMap is developed by the **ADARV** team: **Muniraj Mallesan** (maintainer),
+AdarvMaps is developed by the **ADARV** team: **Muniraj Mallesan** (maintainer),
 **Dr. Sharan Murali** (team lead), Manikandan K, Shanmuga Sundharam, Yogita Chaudhary,
 Barath U, Balaji S, and Deepana R.
 

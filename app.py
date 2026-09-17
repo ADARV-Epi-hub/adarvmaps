@@ -1,4 +1,4 @@
-"""Streamlit web app for SpotMap — no coding required.
+"""Streamlit web app for AdarvMaps — no coding required.
 
 Run locally:
     streamlit run app.py
@@ -13,19 +13,19 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from spotmap import SpotMap
+from adarvmaps import AdarvMaps
 
 
 # =========================================================
 # PAGE CONFIG
 # =========================================================
 st.set_page_config(
-    page_title="SpotMap — Epidemiological Spot Maps",
+    page_title="AdarvMaps — Epidemiological Spot Maps",
     page_icon="🗺️",
     layout="wide",
 )
 
-st.title("🗺️ SpotMap")
+st.title("🗺️ AdarvMaps")
 st.caption("Interactive epidemiological spot maps for India — no coding required")
 
 st.markdown("---")
@@ -140,9 +140,9 @@ if st.button("🚀 Generate Map", type="primary", use_container_width=True):
     with st.spinner("Building map... this takes a few seconds"):
         try:
             # Build map to a temp file
-            tmp_path = Path(tempfile.gettempdir()) / "spotmap_output.html"
+            tmp_path = Path(tempfile.gettempdir()) / "adarvmaps_output.html"
 
-            SpotMap(
+            AdarvMaps(
                 df,
                 lat_col=lat_col,
                 long_col=long_col,
@@ -169,7 +169,7 @@ if st.button("🚀 Generate Map", type="primary", use_container_width=True):
             st.download_button(
                 label="📥 Download HTML map",
                 data=html_bytes,
-                file_name="spotmap_output.html",
+                file_name="adarvmaps_output.html",
                 mime="text/html",
                 use_container_width=True,
             )
@@ -184,6 +184,6 @@ if st.button("🚀 Generate Map", type="primary", use_container_width=True):
 # =========================================================
 st.markdown("---")
 st.caption(
-    "Built with [SpotMap](https://pypi.org/project/spotmap/) · "
-    "[GitHub](https://github.com/ADARV-Epi-hub/spotmap)"
+    "Built with [AdarvMaps](https://pypi.org/project/adarvmaps/) · "
+    "[GitHub](https://github.com/ADARV-Epi-hub/adarvmaps)"
 )

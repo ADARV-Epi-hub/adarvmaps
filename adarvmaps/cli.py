@@ -1,4 +1,4 @@
-"""Command-line interface for spotmap."""
+"""Command-line interface for adarvmaps."""
 
 import argparse
 import sys
@@ -6,19 +6,19 @@ import sys
 
 _EPILOG = """\
 Examples:
-  spotmap                            launch the guided wizard (easiest)
-  spotmap data.csv                   build a map from data.csv
-  spotmap data.csv -o my_map.html    choose where to save the map
+  adarvmaps                            launch the guided wizard (easiest)
+  adarvmaps data.csv                   build a map from data.csv
+  adarvmaps data.csv -o my_map.html    choose where to save the map
 
 In Python or Google Colab:
-  from spotmap import spotmap_run
-  spotmap_run()
+  from adarvmaps import adarvmaps_run
+  adarvmaps_run()
 """
 
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="spotmap",
+        prog="adarvmaps",
         description="Generate an interactive epidemiological spot map for India.",
         epilog=_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -31,8 +31,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "-o", "--output",
-        default="spotmap_output.html",
-        help="Output HTML file path (default: spotmap_output.html).",
+        default="adarvmaps_output.html",
+        help="Output HTML file path (default: adarvmaps_output.html).",
     )
     p.add_argument("--state-shp", default=None, help="Custom state boundary file.")
     p.add_argument("--district-shp", default=None, help="Custom district boundary file.")
@@ -80,14 +80,14 @@ def main(argv=None) -> None:
 
     # No data file given → launch the friendly step-by-step wizard.
     if args.csv is None:
-        from .interactive import spotmap_run
-        spotmap_run(args.output)
+        from .interactive import adarvmaps_run
+        adarvmaps_run(args.output)
         return
 
-    from .map_builder import SpotMap
+    from .map_builder import AdarvMaps
 
     try:
-        SpotMap(
+        AdarvMaps(
             args.csv,
             state_shp=args.state_shp,
             district_shp=args.district_shp,

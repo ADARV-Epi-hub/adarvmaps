@@ -1,5 +1,5 @@
 streamlit>=1.30
-spotmap>=0.1.1
+adarvmaps>=0.1.1
 folium>=0.14
 geopandas>=0.13
 pandas>=2.0

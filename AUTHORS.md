@@ -1,6 +1,6 @@
 # Authors
 
-SpotMap is developed and maintained by the **ADARV** team.
+AdarvMaps is developed and maintained by the **ADARV** team.
 
 | Name | Role |
 |---|---|
