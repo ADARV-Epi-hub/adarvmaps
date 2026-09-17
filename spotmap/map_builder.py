@@ -63,6 +63,13 @@ class SpotMap:
         Hex colour for case pins in spot-map mode.
     control_color:
         Hex colour for control pins in spot-map mode.
+    case_label:
+        Word shown for the "case" group on the map — in the legend, pin
+        pop-ups, and the category menu.  Defaults to ``"Case"``.  Set it to
+        any binary variable's positive value, e.g. ``"Male"`` or ``"Dead"``.
+    control_label:
+        Word shown for the "control" (everything-else) group.  Defaults to
+        ``"Control"``; e.g. ``"Female"`` or ``"Alive"``.
     """
 
     def __init__(
@@ -81,6 +88,8 @@ class SpotMap:
         cluster_color: str = _DEFAULT_CLUSTER_COLOR,
         case_color: str = _DEFAULT_CASE_COLOR,
         control_color: str = _DEFAULT_CONTROL_COLOR,
+        case_label: str = None,
+        control_label: str = None,
     ):
         if not isinstance(data, (str, pd.DataFrame)):
             raise TypeError("data must be a file path (str) or a pandas DataFrame.")
@@ -97,6 +106,11 @@ class SpotMap:
         self.cluster_color = cluster_color
         self.case_color = case_color
         self.control_color = control_color
+        # Words shown for the two groups on the map (legend, popups, menu).
+        # Default to "Case"/"Control" when not given, so existing maps are
+        # unchanged; pass e.g. "Male"/"Female" for any binary variable.
+        self.case_label = case_label or "Case"
+        self.control_label = control_label or "Control"
 
         self._map: folium.Map = None
 
@@ -211,6 +225,8 @@ class SpotMap:
             cluster_color=self.cluster_color,
             case_color=self.case_color,
             control_color=self.control_color,
+            case_label=self.case_label,
+            control_label=self.control_label,
         )
 
         # 9. Sidebar
@@ -226,6 +242,8 @@ class SpotMap:
             cluster_color=self.cluster_color,
             case_color=self.case_color,
             control_color=self.control_color,
+            case_label=self.case_label,
+            control_label=self.control_label,
         )
         m.get_root().html.add_child(folium.Element(sidebar_html))
 

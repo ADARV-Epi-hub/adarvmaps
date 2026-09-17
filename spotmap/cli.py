@@ -61,6 +61,16 @@ def _build_parser() -> argparse.ArgumentParser:
         default="#7676E7",
         help="Hex colour for control pins (default: #7676E7).",
     )
+    p.add_argument(
+        "--case-label",
+        default=None,
+        help="Name for the case group on the map, e.g. Male (default: Case).",
+    )
+    p.add_argument(
+        "--control-label",
+        default=None,
+        help="Name for the control group on the map, e.g. Female (default: Control).",
+    )
     return p
 
 
@@ -89,6 +99,8 @@ def main(argv=None) -> None:
             cluster_color=args.cluster_color,
             case_color=args.case_color,
             control_color=args.control_color,
+            case_label=args.case_label,
+            control_label=args.control_label,
         ).build().save(args.output)
         print(f"Map saved to: {args.output}")
     except Exception as exc:

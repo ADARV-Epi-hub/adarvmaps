@@ -1,82 +1,104 @@
 # SpotMap
 
-**Interactive epidemiological spot maps for India**
+**Interactive epidemiological spot maps for India — no GIS software, no shapefiles, no setup.**
 
-SpotMap turns a CSV of case/control coordinates into a publication-ready interactive HTML map with:
+[![PyPI version](https://img.shields.io/pypi/v/spotmap.svg)](https://pypi.org/project/spotmap/)
+[![Python versions](https://img.shields.io/pypi/pyversions/spotmap.svg)](https://pypi.org/project/spotmap/)
+[![License: MIT](https://img.shields.io/pypi/l/spotmap.svg)](https://github.com/ADARV-Epi-hub/spotmap/blob/main/LICENSE)
 
-- **Dot density** clustering (cases only)
-- **Spot map** pins (cases and/or controls) with custom colours
-- Automatic state/district boundary overlays (bundled data — no shapefile setup needed)
-- Sidebar with mode toggle, colour pickers, pin size slider, and PNG/PDF export
-- Smart auto-detection of latitude, longitude, and outcome columns
+SpotMap turns a spreadsheet of case/control coordinates into a polished, interactive
+HTML map you can open in any browser or drop straight into a report. India's state and
+district boundaries are built in — you don't download or configure anything.
+
+- 📍 **Spot pins** for individual cases and controls, in colours you choose
+- 🔴 **Dot-density** clustering to spot hotspots at a glance
+- 🗺️ Built-in **state & district boundaries** — nothing to download
+- 🏷️ Toggle place-name labels, resize pins, and switch modes live
+- 💾 Export the finished map to **PNG** or **PDF**
+- 🤖 **Auto-detects** your latitude / longitude / outcome columns
 
 ---
 
-## Installation
+## Which guide is for me?
 
+| If this sounds like you… | Go to |
+|---|---|
+| 🙋 **"I just want a map — I don't write code."** | → [Guide for non-coders](#guide-for-non-coders) |
+| 👩‍💻 **"I write Python and want the API / command line."** | → [Guide for developers](#guide-for-developers) |
+
+---
+
+## Guide for non-coders
+
+**You don't need to install anything on your computer.** The easiest way is
+**Google Colab** — a free notebook that runs in your web browser.
+
+**Step 1** — Open **[colab.research.google.com](https://colab.research.google.com)** and click **New notebook**.
+
+**Step 2** — Paste these two lines into the cell and press ▶:
+```python
+!pip install spotmap
+import spotmap; spotmap.run()
+```
+
+**Step 3** — Follow the simple prompts:
+1. Click the button to **upload your data file**.
+2. Confirm the **latitude**, **longitude**, and **case/control** columns SpotMap detected.
+3. Choose which value means a **"case"** (e.g. `case`, `positive`, `1`).
+
+Your map appears right below the cell and is saved as `spotmap.html` to download and share.
+
+> 💡 See [Preparing your data](#preparing-your-data) — any spreadsheet with location and case/control columns works.
+
+---
+
+## Guide for developers
+
+### Install
 ```bash
 pip install spotmap
 ```
+Python 3.9+.
 
----
-
-## Quick start
-
-### Interactive (no coding required)
-
-The easiest way — works great in **Google Colab** or a Jupyter notebook.
-Install it, then run these two lines:
-
-```python
-!pip install spotmap
-
-import spotmap
-spotmap.run()
-```
-
-SpotMap then walks you through a few simple prompts:
-
-1. **Upload your data file** (in Colab an upload button appears; elsewhere it
-   asks for the file path).
-2. Confirm which columns hold latitude, longitude, and the case/control outcome
-   (SpotMap pre-selects its best guess).
-3. Pick which value means "case".
-
-The finished map is **shown right in the notebook cell** — no need to hunt for a
-file — and is also saved as `spotmap.html` (pass a different name with
-`spotmap_run("my_map.html")`).
-
-> In a plain terminal, `spotmap_run()` reads your answers from the keyboard and
-> saves an HTML file to open in your browser. For automated scripts, use the
-> Python API below instead.
-
-### Python API
-
+### Usage
 ```python
 from spotmap import SpotMap
 
+# `data` accepts a CSV path or a pandas DataFrame
 SpotMap("my_data.csv").build().save("map.html")
 ```
 
-### Command line
-
+Or from the command line:
 ```bash
 spotmap my_data.csv -o map.html
 ```
 
+### Common options
+`SpotMap(data, ...)` — all options below are keyword arguments:
+
+| Option | Default | Description |
+|---|---|---|
+| `lat_col`, `long_col`, `outcome_col` | auto | Override column auto-detection |
+| `case_value` | auto | Value in `outcome_col` that means "case" |
+| `all_cases` | `False` | Treat every row as a case (no controls) |
+| `case_color`, `control_color`, `cluster_color` | ADARV palette | Marker colours (hex) |
+| `state_shp`, `district_shp` | bundled | Use your own boundary files |
+
+**Full API and CLI reference →** [DOCUMENTATION.md](https://github.com/ADARV-Epi-hub/spotmap/blob/main/DOCUMENTATION.md)
+
 ---
 
-## CSV format
+## Preparing your data
 
-SpotMap auto-detects columns — no strict naming required.
+SpotMap reads a CSV and **auto-detects** the columns — you don't have to rename anything.
+At a minimum it needs **location** and **outcome**:
 
-| Requirement | Details |
+| What SpotMap needs | How to provide it |
 |---|---|
-| **Coordinates** | Separate `lat` / `lon` columns **or** a combined `"lat,lon"` column |
-| **Outcome** | A column named `outcome`, `status`, `case_control`, etc. with values like `case` / `control` |
+| **Coordinates** | Separate `lat` / `lon` columns **or** one combined `"lat,lon"` column |
+| **Outcome** | A column (e.g. `outcome`, `status`, `case_control`) with values like `case` / `control` |
 
-Example:
-
+**Example:**
 ```csv
 latitude,longitude,outcome
 28.6,77.2,case
@@ -86,67 +108,20 @@ latitude,longitude,outcome
 
 ---
 
-## Python API reference
+## What you get
 
-```python
-SpotMap(
-    csv_path,                       # required
-    state_shp=None,                 # custom state boundary (shapefile/GeoPackage)
-    district_shp=None,              # custom district boundary
-    lat_col=None,                   # override auto-detection
-    long_col=None,
-    outcome_col=None,
-    case_value=None,                # value that means "case" in outcome_col
-    count_cutoff=2,                 # districts ≤ cutoff → district zoom
-    margin_deg=1.0,                 # boundary crop padding
-    cluster_color="#E85252",        # dot-density bubble colour
-    case_color="#D55757",           # case pin colour
-    control_color="#7676E7",        # control pin colour
-)
-```
-
-Chain calls:
-
-```python
-sm = SpotMap("data.csv", case_color="#FF0000").build()
-sm.save("map.html")
-
-# Access the raw Folium map for further customisation
-folium_map = sm.map
-```
-
----
-
-## CLI reference
-
-```
-usage: spotmap [-h] [-o OUTPUT] [--state-shp STATE_SHP]
-               [--district-shp DISTRICT_SHP] [--lat-col LAT_COL]
-               [--lon-col LON_COL] [--outcome-col OUTCOME_COL]
-               [--case-value CASE_VALUE] [--count-cutoff COUNT_CUTOFF]
-               [--cluster-color CLUSTER_COLOR] [--case-color CASE_COLOR]
-               [--control-color CONTROL_COLOR]
-               csv
-```
+A single, self-contained HTML file you can open in any browser or share. Its sidebar lets
+anyone switch between **Dot Density** and **Spot Pins**, show **Cases Only** or
+**Cases & Controls**, recolour markers, resize pins, toggle **place-name labels**, and
+export to **PNG / PDF**.
 
 ---
 
 ## Team
 
-SpotMap is developed by the **ADARV** team:
-
-| Name | Role |
-|---|---|
-| Muniraj Mallesan | Maintainer |
-| Dr. Sharan Murali | Team Lead |
-| Manikandan K | |
-| Shanmuga Sundharam | |
-| Yogita Chaudhary | |
-| Barath U | |
-| Balaji S | |
-| Deepana R | |
-
----
+SpotMap is developed by the **ADARV** team: **Muniraj Mallesan** (maintainer),
+**Dr. Sharan Murali** (team lead), Manikandan K, Shanmuga Sundharam, Yogita Chaudhary,
+Barath U, Balaji S, and Deepana R.
 
 ## License
 

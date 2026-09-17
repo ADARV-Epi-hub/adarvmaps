@@ -410,6 +410,29 @@ def _step_pick_case_value(df: pd.DataFrame, outcome_col: str) -> str:
     return case_value
 
 
+def _step_pick_labels(df: pd.DataFrame, outcome_col: str, case_value: str):
+    """Step 6 — what the two groups should be called on the map.
+
+    Suggests names from the data (e.g. case value 'male' -> 'Male', and the
+    only other value -> its own name), so the legend / pop-ups / menu read
+    naturally instead of always saying 'Case' / 'Control'.  Press Enter to
+    accept the suggestions.
+    """
+    norm = df[outcome_col].dropna().astype(str).str.strip()
+    others = [v for v in norm.unique().tolist() if v != str(case_value).strip()]
+    default_case = str(case_value).strip().title() or "Case"
+    default_control = others[0].strip().title() if len(others) == 1 else "Control"
+
+    print("\n" + "─" * 55)
+    print("🏷️  Step 6 — What should the two groups be called on the map?")
+    print("   (Shown in the legend, the pin pop-ups, and the menu.)")
+    print("   Press Enter to accept the suggested names.")
+    print("─" * 55)
+    case_label = _ask("Name for the CASE group", default=default_case)
+    control_label = _ask("Name for the OTHER (control) group", default=default_control)
+    return case_label, control_label
+
+
 def _step_output_path() -> str:
     """Step 4 — where to save the HTML."""
     while True:
@@ -448,7 +471,8 @@ def _step_output_path() -> str:
         return path
 
 
-def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path):
+def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
+                    case_label=None, control_label=None):
     """Step 5 — actually build the map."""
     print("\n⚙️  Building the map...")
     all_cases = outcome_col == _NO_OUTCOME
@@ -460,6 +484,8 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path)
             outcome_col=None if all_cases else outcome_col,
             case_value=None if all_cases else case_value,
             all_cases=all_cases,
+            case_label=case_label,
+            control_label=control_label,
         ).build()
         sm.save(output_path)
         _ok(f"Map saved to: {output_path}")
@@ -522,17 +548,20 @@ def spotmap_run(output_path: str = _DEFAULT_OUTPUT) -> None:
     # Step 2 — pick columns
     lat_col, long_col, outcome_col = _step_pick_columns(df)
 
-    # Step 3 — pick case value (skipped in cases-only mode)
+    # Step 3 — pick case value + group labels (skipped in cases-only mode)
     if outcome_col == _NO_OUTCOME:
         case_value = None
+        case_label = control_label = None
         _info(f"Treating all {len(df)} rows as cases (no controls).")
     else:
         case_value = _step_pick_case_value(df, outcome_col)
+        case_label, control_label = _step_pick_labels(df, outcome_col, case_value)
 
     # Step 4 — build immediately (no confirmation needed)
     while True:
         sm = _step_build_map(
-            df, lat_col, long_col, outcome_col, case_value, output_path
+            df, lat_col, long_col, outcome_col, case_value, output_path,
+            case_label=case_label, control_label=control_label,
         )
         if sm:
             break
@@ -545,9 +574,11 @@ def spotmap_run(output_path: str = _DEFAULT_OUTPUT) -> None:
         lat_col, long_col, outcome_col = _step_pick_columns(df)
         if outcome_col == _NO_OUTCOME:
             case_value = None
+            case_label = control_label = None
             _info(f"Treating all {len(df)} rows as cases (no controls).")
         else:
             case_value = _step_pick_case_value(df, outcome_col)
+            case_label, control_label = _step_pick_labels(df, outcome_col, case_value)
 
     _line()
     if _in_notebook():

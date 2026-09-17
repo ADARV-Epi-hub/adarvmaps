@@ -107,8 +107,13 @@ def add_marker_layers(
     cluster_color: str,
     case_color: str,
     control_color: str,
+    case_label: str = "Case",
+    control_label: str = "Control",
 ):
     """Add dot-density cluster and spot-map pin layers.
+
+    *case_label* / *control_label* are the words shown for the two groups in
+    each pin's popup (e.g. "Male" / "Female"); they default to Case / Control.
 
     Returns:
         (cluster_layer, pins_cases_layer, pins_controls_layer)
@@ -134,7 +139,7 @@ def add_marker_layers(
     for _, row in points_cases.iterrows():
         lat, lon = row.geometry.y, row.geometry.x
         popup = (
-            f"<b>Type:</b> Case<br>"
+            f"<b>Type:</b> {case_label}<br>"
             f"<b>State:</b> {row.get(state_name_col, '')}<br>"
             f"<b>District:</b> {row.get(district_name_col, '')}"
         )
@@ -144,7 +149,7 @@ def add_marker_layers(
     for _, row in points_controls.iterrows():
         lat, lon = row.geometry.y, row.geometry.x
         popup = (
-            f"<b>Type:</b> Control<br>"
+            f"<b>Type:</b> {control_label}<br>"
             f"<b>State:</b> {row.get(state_name_col, '')}<br>"
             f"<b>District:</b> {row.get(district_name_col, '')}"
         )

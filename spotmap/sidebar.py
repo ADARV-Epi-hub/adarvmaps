@@ -1,5 +1,8 @@
 """Top toolbar HTML/JS/CSS generation (ADARV attached-bar layout)."""
 
+import html as _html
+import json as _json
+
 
 def build_sidebar_html(
     map_id: str,
@@ -13,7 +16,15 @@ def build_sidebar_html(
     cluster_color: str,
     case_color: str,
     control_color: str,
+    case_label: str = "Case",
+    control_label: str = "Control",
 ) -> str:
+    # The two group names are user-supplied, so escape them for the HTML spots
+    # (legend, menu) and JSON-encode them for the inline JavaScript.
+    ch = _html.escape(case_label)
+    cn = _html.escape(control_label)
+    case_label_js = _json.dumps(case_label)
+    control_label_js = _json.dumps(control_label)
     return f"""
 <style>
 :root {{
@@ -149,11 +160,11 @@ def build_sidebar_html(
     <h4>Legend</h4>
     <div class="legend-item" id="legend-case-item">
         <span class="legend-icon" id="legend-icon-case" style="background-color:{case_color};"></span>
-        <span>Case</span>
+        <span>{ch}</span>
     </div>
     <div class="legend-item" id="legend-control-item" style="display:none;">
         <span class="legend-icon" id="legend-icon-control" style="background-color:{control_color};"></span>
-        <span>Control</span>
+        <span>{cn}</span>
     </div>
 </div>
 
@@ -176,14 +187,14 @@ def build_sidebar_html(
   <div class="sm-group">
     <span class="sm-chip-label"><span class="dot"></span>Category</span>
     <div class="sm-dropdown" id="dd-category">
-      <button class="sm-pill" id="categoryBtn" title="Show only cases, or cases and controls together (and pick their colours)"><span id="categoryLabel">Only Cases</span> <span class="caret">&#9660;</span></button>
+      <button class="sm-pill" id="categoryBtn" title="Show only one group, or both groups together (and pick their colours)"><span id="categoryLabel">Only {ch}</span> <span class="caret">&#9660;</span></button>
       <div class="sm-menu" id="categoryMenu">
         <div class="sm-menu-title">Spot Map Filter</div>
-        <div class="sm-menu-item" data-filter="cases"><span>Only Cases</span><span class="check">&#10003;</span></div>
-        <div class="sm-menu-item" data-filter="both"><span>Case &amp; Control</span><span class="check">&#10003;</span></div>
+        <div class="sm-menu-item" data-filter="cases"><span>Only {ch}</span><span class="check">&#10003;</span></div>
+        <div class="sm-menu-item" data-filter="both"><span>{ch} &amp; {cn}</span><span class="check">&#10003;</span></div>
         <div class="sm-menu-title">Colours</div>
-        <div class="sm-color-row" id="row-case"><span>Case</span><input type="color" id="caseColorPicker" value="{case_color}"></div>
-        <div class="sm-color-row" id="row-control"><span>Control</span><input type="color" id="controlColorPicker" value="{control_color}"></div>
+        <div class="sm-color-row" id="row-case"><span>{ch}</span><input type="color" id="caseColorPicker" value="{case_color}"></div>
+        <div class="sm-color-row" id="row-control"><span>{cn}</span><input type="color" id="controlColorPicker" value="{control_color}"></div>
         <div class="sm-color-row" id="row-cluster"><span>Cluster</span><input type="color" id="clusterCustomColor" value="{cluster_color}"></div>
       </div>
     </div>
@@ -244,6 +255,9 @@ window.addEventListener('load', function() {{
   window.clusterBaseColor = '{cluster_color}';
   window.pinScale         = 0.75;
 
+  var caseLabel    = {case_label_js};
+  var controlLabel = {control_label_js};
+
   // Dot density only makes sense for cases, so it is disabled when the
   // user shows Case & Control.
   var state = {{ mode: 'dots', filter: 'cases', pinPct: 75 }};
@@ -294,7 +308,7 @@ window.addEventListener('load', function() {{
     document.querySelectorAll('#categoryMenu .sm-menu-item').forEach(function(it) {{
       it.classList.toggle('active', it.getAttribute('data-filter') === state.filter);
     }});
-    byId('categoryLabel').textContent = state.filter === 'both' ? 'Case & Control' : 'Only Cases';
+    byId('categoryLabel').textContent = state.filter === 'both' ? (caseLabel + ' & ' + controlLabel) : ('Only ' + caseLabel);
 
     // Dot Density is only valid for "Only Cases" -> grey it out for both
     var dotsItem = document.querySelector('#maptypeMenu .sm-menu-item[data-mode="dots"]');
