@@ -395,8 +395,8 @@ def _step_pick_case_value(df: pd.DataFrame, outcome_col: str) -> str:
             default_idx = i
             break
 
-    print("Which value is the main group? (everything else becomes the other group)")
-    case_value = _ask_choice("Main group value", values, default_idx)
+    print("Which value is the main category in this group?")
+    case_value = _ask_choice("Main category value", values, default_idx)
 
     # Show the user EXACTLY what will happen
     n_cases = counts[case_value]
