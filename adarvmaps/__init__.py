@@ -7,7 +7,7 @@ from .map_builder import AdarvMaps
 # Short, friendly alias so non-coders can simply do:  import adarvmaps; adarvmaps.run()
 run = adarvmaps_run
 
-__version__ = "0.1.36"
+__version__ = "0.1.37"
 __all__ = [
     "AdarvMaps",
     "run",  # friendly alias for adarvmaps_run
