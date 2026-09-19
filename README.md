@@ -95,18 +95,19 @@ accept it, or type the number of the correct choice.
    - **Remember:** if the points later look misplaced, the most common cause is that
      latitude and longitude are swapped.
 
-4. **Which column has the outcome?**
-   - If your spreadsheet has a variable that splits the data into *cases* and *controls*,
-     or *affected* and *not affected*, choose it here. You can equally use this to show
-     *male* / *female*, *dead* / *alive*, or *positive* / *negative* differently on the
-     map — AdarvMaps lets you name the two groups.
-   - If you don't want any split, choose the first option: *My data is all cases (no
-     control group)*.
+4. **Which column is your grouping variable?**
+   - Choose the column that splits your data into two groups — *case* / *control*,
+     *affected* / *not affected*, *male* / *female*, *dead* / *alive*, *positive* /
+     *negative*, and so on. The map uses the **actual values from your data** as the group
+     names automatically — you don't have to type anything.
+   - If you don't want any split, choose the first option: *No grouping — show all rows
+     the same*.
 
-5. **Which value marks the outcome?**
-   - AdarvMaps lists the values found in the column you chose. Tell it which value is the
-     "case" (for example, if you coded `1 = Case, 0 = Control`, choose `1`).
-   - Every other value is treated as the other group.
+5. **Which value is the main group?**
+   - AdarvMaps lists the values found in the column you chose. Tell it which one is the
+     **main group** (it's the highlighted / clustered group; for example, if you coded
+     `1 = Case, 0 = Control`, choose `1`).
+   - Every other value becomes the other group, shown with its own name.
 
 ### Step 4 — Get your map
 - Your map appears right below the cell and is saved as a file called `adarvmaps.html`.

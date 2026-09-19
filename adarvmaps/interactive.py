@@ -303,16 +303,16 @@ def _step_pick_columns(df: pd.DataFrame):
     long_col = _ask_choice("Your longitude column", cols, _guess(cols, _LONG_NAMES), previews)
 
     print("\n" + "─" * 55)
-    print("🏥 Step 4 — Which column says whether each row is a case or a control?")
-    print("   (e.g. values like 'case'/'control' or '1'/'0')")
-    print("   If your data is all cases with no control group, pick the")
-    print("   first option below.")
+    print("🏥 Step 4 — Which column is your grouping variable?")
+    print("   (the column that splits the data into two groups — e.g.")
+    print("    case/control, male/female, dead/alive, positive/negative)")
+    print("   If you don't want any split, pick the first option below.")
     print("─" * 55)
-    no_outcome_label = "My data is all cases (no control group)"
+    no_outcome_label = "No grouping — show all rows the same"
     cols_with_none = [no_outcome_label] + cols
-    previews_with_none = ["All rows treated as cases"] + previews
+    previews_with_none = ["All rows shown the same"] + previews
     outcome_choice = _ask_choice(
-        "Your outcome column",
+        "Your grouping variable",
         cols_with_none,
         _guess(cols, _OUT_NAMES) + 1,
         previews_with_none,
@@ -378,8 +378,9 @@ def _step_pick_case_value(df: pd.DataFrame, outcome_col: str) -> str:
 
     # Show values WITH counts
     print("\n" + "─" * 55)
-    print(f"🎯 Step 5 — In '{outcome_col}', which value marks a case?")
-    print("   (Everything else is treated as a control)")
+    print(f"🎯 Step 5 — In '{outcome_col}', which value is the main group?")
+    print("   (This group is highlighted / clustered; everything else is the")
+    print("    other group. Both keep their own names from your data.)")
     print("─" * 55)
     print(f"\nHere's what we found in '{outcome_col}':\n")
     for i, v in enumerate(values, 1):
@@ -394,43 +395,20 @@ def _step_pick_case_value(df: pd.DataFrame, outcome_col: str) -> str:
             default_idx = i
             break
 
-    print("Which value should be treated as CASE? (everything else becomes CONTROL)")
-    case_value = _ask_choice("Case value", values, default_idx)
+    print("Which value is the main group? (everything else becomes the other group)")
+    case_value = _ask_choice("Main group value", values, default_idx)
 
     # Show the user EXACTLY what will happen
     n_cases = counts[case_value]
     n_controls = counts.sum() - n_cases
     print()
-    _info(f"Plotting {n_cases} cases and {n_controls} controls.")
+    _info(f"Plotting {n_cases} '{case_value}' and {n_controls} other.")
 
     if n_cases == 0:
         _err("No case rows — cannot build map.")
         return _step_pick_case_value(df, outcome_col)
 
     return case_value
-
-
-def _step_pick_labels(df: pd.DataFrame, outcome_col: str, case_value: str):
-    """Step 6 — what the two groups should be called on the map.
-
-    Suggests names from the data (e.g. case value 'male' -> 'Male', and the
-    only other value -> its own name), so the legend / pop-ups / menu read
-    naturally instead of always saying 'Case' / 'Control'.  Press Enter to
-    accept the suggestions.
-    """
-    norm = df[outcome_col].dropna().astype(str).str.strip()
-    others = [v for v in norm.unique().tolist() if v != str(case_value).strip()]
-    default_case = str(case_value).strip().title() or "Case"
-    default_control = others[0].strip().title() if len(others) == 1 else "Control"
-
-    print("\n" + "─" * 55)
-    print("🏷️  Step 6 — What should the two groups be called on the map?")
-    print("   (Shown in the legend, the pin pop-ups, and the menu.)")
-    print("   Press Enter to accept the suggested names.")
-    print("─" * 55)
-    case_label = _ask("Name for the CASE group", default=default_case)
-    control_label = _ask("Name for the OTHER (control) group", default=default_control)
-    return case_label, control_label
 
 
 def _step_output_path() -> str:
@@ -548,20 +526,18 @@ def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
     # Step 2 — pick columns
     lat_col, long_col, outcome_col = _step_pick_columns(df)
 
-    # Step 3 — pick case value + group labels (skipped in cases-only mode)
+    # Step 3 — pick the main group value (skipped when there's no grouping).
+    # Group labels are taken automatically from the data values in build().
     if outcome_col == _NO_OUTCOME:
         case_value = None
-        case_label = control_label = None
-        _info(f"Treating all {len(df)} rows as cases (no controls).")
+        _info(f"No grouping — showing all {len(df)} rows the same.")
     else:
         case_value = _step_pick_case_value(df, outcome_col)
-        case_label, control_label = _step_pick_labels(df, outcome_col, case_value)
 
     # Step 4 — build immediately (no confirmation needed)
     while True:
         sm = _step_build_map(
-            df, lat_col, long_col, outcome_col, case_value, output_path,
-            case_label=case_label, control_label=control_label,
+            df, lat_col, long_col, outcome_col, case_value, output_path
         )
         if sm:
             break
@@ -574,11 +550,9 @@ def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
         lat_col, long_col, outcome_col = _step_pick_columns(df)
         if outcome_col == _NO_OUTCOME:
             case_value = None
-            case_label = control_label = None
-            _info(f"Treating all {len(df)} rows as cases (no controls).")
+            _info(f"No grouping — showing all {len(df)} rows the same.")
         else:
             case_value = _step_pick_case_value(df, outcome_col)
-            case_label, control_label = _step_pick_labels(df, outcome_col, case_value)
 
     _line()
     if _in_notebook():

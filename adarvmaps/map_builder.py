@@ -65,11 +65,12 @@ class AdarvMaps:
         Hex colour for control pins in spot-map mode.
     case_label:
         Word shown for the "case" group on the map — in the legend, pin
-        pop-ups, and the category menu.  Defaults to ``"Case"``.  Set it to
-        any binary variable's positive value, e.g. ``"Male"`` or ``"Dead"``.
+        pop-ups, and the category menu.  Defaults to the **actual value** from
+        the grouping column (e.g. ``"Dead"``).  Pass a string only to override.
     control_label:
-        Word shown for the "control" (everything-else) group.  Defaults to
-        ``"Control"``; e.g. ``"Female"`` or ``"Alive"``.
+        Word shown for the other group.  Defaults to the other value in the
+        grouping column when there is exactly one (e.g. ``"Alive"``), otherwise
+        ``"Others"``.  Pass a string only to override.
     """
 
     def __init__(
@@ -107,12 +108,38 @@ class AdarvMaps:
         self.case_color = case_color
         self.control_color = control_color
         # Words shown for the two groups on the map (legend, popups, menu).
-        # Default to "Case"/"Control" when not given, so existing maps are
-        # unchanged; pass e.g. "Male"/"Female" for any binary variable.
-        self.case_label = case_label or "Case"
-        self.control_label = control_label or "Control"
+        # When not given, they default to the actual values found in the data
+        # (derived in build()); pass explicit strings only to override.
+        self.case_label = case_label
+        self.control_label = control_label
 
         self._map: folium.Map = None
+
+    def _resolve_labels(self, df, outcome_col, case_value):
+        """Decide the two group labels shown on the map.
+
+        Defaults to the actual values in the grouping column — the "case" value
+        for one group, and (when there is exactly one other value) that value
+        for the other group, else "Others".  Explicit case_label /
+        control_label passed to the constructor always win.
+        """
+        if self.all_cases:
+            return (self.case_label or "Case", self.control_label or "Control")
+
+        orig = df[outcome_col].dropna().astype(str).str.strip()
+        norm = orig.str.lower()
+        cv = str(case_value).strip().lower()
+        case_vals = orig[norm == cv].unique().tolist()
+        other_vals = orig[norm != cv].unique().tolist()
+
+        case_label = self.case_label or (case_vals[0] if case_vals else str(case_value))
+        if self.control_label:
+            control_label = self.control_label
+        elif len(other_vals) == 1:
+            control_label = other_vals[0]
+        else:
+            control_label = "Others"
+        return case_label, control_label
 
     # ------------------------------------------------------------------
     # Public API
@@ -132,6 +159,11 @@ class AdarvMaps:
             case_value=self.case_value,
             all_cases=self.all_cases,
         )
+
+        # 1a. Group labels: default to the actual values in the grouping column
+        #     (e.g. "Dead" / "Alive"), so the map shows the data's own words.
+        #     Explicit case_label / control_label override this.
+        case_label, control_label = self._resolve_labels(df, outcome_col, case_value)
 
         # 2. Load boundaries
         states, districts, state_name_col, district_name_col = load_boundaries(
@@ -225,8 +257,8 @@ class AdarvMaps:
             cluster_color=self.cluster_color,
             case_color=self.case_color,
             control_color=self.control_color,
-            case_label=self.case_label,
-            control_label=self.control_label,
+            case_label=case_label,
+            control_label=control_label,
         )
 
         # 9. Sidebar
@@ -242,8 +274,8 @@ class AdarvMaps:
             cluster_color=self.cluster_color,
             case_color=self.case_color,
             control_color=self.control_color,
-            case_label=self.case_label,
-            control_label=self.control_label,
+            case_label=case_label,
+            control_label=control_label,
         )
         m.get_root().html.add_child(folium.Element(sidebar_html))
 
