@@ -229,7 +229,9 @@ def build_sidebar_html(
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet-simple-map-screenshoter"></script>
+<!-- Pinned: an unversioned CDN URL would silently pick up upstream breaking
+     changes in every map already generated. -->
+<script src="https://unpkg.com/leaflet-simple-map-screenshoter@0.5.0/dist/leaflet-simple-map-screenshoter.js"></script>
 <script>
 window.addEventListener('load', function() {{
   var mapObj            = {map_id};

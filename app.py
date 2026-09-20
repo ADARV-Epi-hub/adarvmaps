@@ -6,7 +6,6 @@ Run locally:
 Or deploy free at: https://share.streamlit.io
 """
 
-import io
 import tempfile
 from pathlib import Path
 

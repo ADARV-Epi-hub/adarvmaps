@@ -111,7 +111,8 @@ accept it, or type the number of the correct choice.
 
 ### Step 4 — Get your map
 - Your map appears right below the cell and is saved as a file called `adarvmaps.html`.
-- Download it and open it in any browser — it works on its own, no internet needed to view.
+- Download it and open it in any browser, or email it to a colleague — it's a single
+  self-contained file (an internet connection is needed to load the background map tiles).
 - Using the map's sidebar you can: switch between **Spot Map** and **Dot Density**, show one
   group or both, change colours and resize the dots, toggle **place-name labels**, and save
   the map as a **PNG** or **PDF**.
