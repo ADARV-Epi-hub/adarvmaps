@@ -1,4 +1,4 @@
-"""Command-line interface for adarvmaps."""
+"""Command-line interface for adarvmap."""
 
 import argparse
 import sys
@@ -6,19 +6,19 @@ import sys
 
 _EPILOG = """\
 Examples:
-  adarvmaps                            launch the guided wizard (easiest)
-  adarvmaps data.csv                   build a map from data.csv
-  adarvmaps data.csv -o my_map.html    choose where to save the map
+  adarvmap                            launch the guided wizard (easiest)
+  adarvmap data.csv                   build a map from data.csv
+  adarvmap data.csv -o my_map.html    choose where to save the map
 
 In Python or Google Colab:
-  from adarvmaps import adarvmaps_run
-  adarvmaps_run()
+  from adarvmap import adarvmap_run
+  adarvmap_run()
 """
 
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="adarvmaps",
+        prog="adarvmap",
         description="Generate an interactive epidemiological spot map for India.",
         epilog=_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -80,16 +80,16 @@ def main(argv=None) -> None:
 
     # No data file given → launch the friendly step-by-step wizard.
     if args.csv is None:
-        from .interactive import adarvmaps_run
-        adarvmaps_run(args.output)
+        from .interactive import adarvmap_run
+        adarvmap_run(args.output)
         return
 
-    from .map_builder import AdarvMaps
+    from .map_builder import AdarvMap
     from .interactive import _default_output
 
     output = args.output or _default_output()
     try:
-        AdarvMaps(
+        AdarvMap(
             args.csv,
             state_shp=args.state_shp,
             district_shp=args.district_shp,

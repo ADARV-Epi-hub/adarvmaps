@@ -1,4 +1,4 @@
-"""Main AdarvMaps class — orchestrates loading, spatial join, and map building."""
+"""Main AdarvMap class — orchestrates loading, spatial join, and map building."""
 
 import folium
 import pandas as pd
@@ -25,7 +25,7 @@ _DEFAULT_CASE_COLOR = "#D55757"
 _DEFAULT_CONTROL_COLOR = "#7676E7"
 
 
-class AdarvMaps:
+class AdarvMap:
     """Build an interactive epidemiological spot map for India.
 
     Parameters
@@ -145,10 +145,10 @@ class AdarvMaps:
     # Public API
     # ------------------------------------------------------------------
 
-    def build(self) -> "AdarvMaps":
+    def build(self) -> "AdarvMap":
         """Run the full pipeline and store the Folium map internally.
 
-        Returns *self* so calls can be chained: ``AdarvMaps(...).build().save(...)``.
+        Returns *self* so calls can be chained: ``AdarvMap(...).build().save(...)``.
         """
         # 1. Load data (path or DataFrame)
         df, lat_col, long_col, outcome_col, case_value = load_csv(
@@ -177,7 +177,7 @@ class AdarvMaps:
         )
 
         # 4. Split cases / controls
-        mask = points_joined["_adarvmaps_outcome_norm"] == case_value
+        mask = points_joined["_adarvmap_outcome_norm"] == case_value
         points_cases = points_joined[mask].copy()
         points_controls = points_joined[~mask].copy()
 
@@ -277,7 +277,7 @@ class AdarvMaps:
         self._map = m
         return self
 
-    def save(self, output_path: str) -> "AdarvMaps":
+    def save(self, output_path: str) -> "AdarvMap":
         """Save the built map to an HTML file."""
         if self._map is None:
             raise RuntimeError("Call .build() before .save().")

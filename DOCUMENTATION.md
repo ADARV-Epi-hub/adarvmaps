@@ -1,15 +1,15 @@
-# AdarvMaps — Developer Documentation
+# AdarvMap — Developer Documentation
 
-Internal/architecture guide for the **adarvmaps** package. For installation and
+Internal/architecture guide for the **adarvmap** package. For installation and
 end-user usage, see [README.md](README.md). This document explains how the code
 is organised, how data flows through the pipeline, and the conventions a
 contributor needs to know.
 
 ---
 
-## 1. What AdarvMaps does
+## 1. What AdarvMap does
 
-AdarvMaps turns a table of case/control coordinates into a self-contained
+AdarvMap turns a table of case/control coordinates into a self-contained
 interactive HTML map for India. Each row becomes a point; points are spatially
 joined to bundled state and district boundaries, split into cases vs. controls,
 and rendered with [Folium](https://python-visualization.github.io/folium/)
@@ -27,17 +27,17 @@ Two presentation modes share the same data:
 ## 2. Project layout
 
 ```
-adarvmaps/
-├── adarvmaps/                  # the installable package
+adarvmap/
+├── adarvmap/                  # the installable package
 │   ├── __init__.py           # public exports + __version__
-│   ├── map_builder.py        # AdarvMaps class — orchestrates the pipeline
+│   ├── map_builder.py        # AdarvMap class — orchestrates the pipeline
 │   ├── loader.py             # file reading + column/case auto-detection
 │   ├── spatial.py            # boundary loading, spatial join, mode/zoom logic
 │   ├── layers.py             # Folium cluster + pin layer builders
 │   ├── sidebar.py            # generated HTML/CSS/JS control panel
-│   ├── interactive.py        # adarvmaps_run() terminal wizard for non-coders
-│   ├── cli.py                # `adarvmaps` console-script entry point
-│   ├── exceptions.py         # AdarvMapsError hierarchy
+│   ├── interactive.py        # adarvmap_run() terminal wizard for non-coders
+│   ├── cli.py                # `adarvmap` console-script entry point
+│   ├── exceptions.py         # AdarvMapError hierarchy
 │   └── data/                 # bundled India boundaries (FlatGeobuf)
 │       ├── state_boundary_lite.fgb
 │       └── district_boundary_lite.fgb
@@ -50,21 +50,21 @@ adarvmaps/
 ```
 
 There are three independent entry points, all of which converge on the
-`AdarvMaps` class:
+`AdarvMap` class:
 
 | Entry point | Audience | Lives in |
 |---|---|---|
-| `AdarvMaps(...).build().save(...)` | Python developers | `map_builder.py` |
-| `adarvmaps <csv> -o out.html` | command-line users | `cli.py` |
-| `adarvmaps_run()` / `streamlit run app.py` | non-coders | `interactive.py` / `app.py` |
+| `AdarvMap(...).build().save(...)` | Python developers | `map_builder.py` |
+| `adarvmap <csv> -o out.html` | command-line users | `cli.py` |
+| `adarvmap_run()` / `streamlit run app.py` | non-coders | `interactive.py` / `app.py` |
 
 ---
 
 ## 3. The build pipeline
 
-`AdarvMaps.build()` ([adarvmaps/map_builder.py](adarvmaps/map_builder.py)) runs the
+`AdarvMap.build()` ([adarvmap/map_builder.py](adarvmap/map_builder.py)) runs the
 whole pipeline and stores the Folium map on `self._map`. It returns `self` so
-calls chain: `AdarvMaps(data).build().save("map.html")`.
+calls chain: `AdarvMap(data).build().save("map.html")`.
 
 ```
 data (path or DataFrame)
@@ -98,7 +98,7 @@ data (path or DataFrame)
         ▼
 ┌───────────────────────────────────────────────┐
 │ 4. split cases / controls    map_builder.py    │
-│    mask = _adarvmaps_outcome_norm == case_value  │
+│    mask = _adarvmap_outcome_norm == case_value  │
 │    (raises NoCasePointsError if no cases)       │
 └───────────────────────────────────────────────┘
         │
@@ -138,7 +138,7 @@ data (path or DataFrame)
   (`_is_pair_col` / `_detect_from_combined`), then for separately named numeric
   columns (matching `_LAT_NAMES` / `_LON_NAMES`), then falls back to "the only
   two numeric columns". A combined column is split into hidden
-  `_adarvmaps_auto_lat` / `_adarvmaps_auto_lon` columns, disambiguating lat vs. lon
+  `_adarvmap_auto_lat` / `_adarvmap_auto_lon` columns, disambiguating lat vs. lon
   by magnitude (anything with |value| > 90 must be longitude).
 - **Outcome detection** (`detect_outcome`): searches column names against
   `_OUTCOME_CANDIDATES`; picks the case value from `_CASE_VALUES`
@@ -185,25 +185,25 @@ Leaflet objects by the names returned from `add_marker_layers` and
 `map.get_name()`.
 
 ### `map_builder.py` — orchestration
-The **`AdarvMaps`** class holds configuration and runs the pipeline. Key options:
+The **`AdarvMap`** class holds configuration and runs the pipeline. Key options:
 `state_shp` / `district_shp` (custom boundaries), `lat_col` / `long_col` /
 `outcome_col` / `case_value` (override auto-detection), `count_cutoff` (zoom
 threshold), `margin_deg` (crop padding), and the three colour overrides.
 `.save()` raises `RuntimeError` if called before `.build()`.
 
 ### `cli.py` — console script
-Argparse front-end registered as the `adarvmaps` entry point in
+Argparse front-end registered as the `adarvmap` entry point in
 `pyproject.toml`. Every error is caught and printed to stderr with exit code 1.
 
 ### `interactive.py` — terminal wizard
-**`adarvmaps_run(output_path)`** is a friendly, retry-on-error prompt flow for
+**`adarvmap_run(output_path)`** is a friendly, retry-on-error prompt flow for
 non-coders: load file → pick columns → pick the case value (with value-count
 bars) → build. `run_interactive` is a **deprecated alias** kept for backward
 compatibility (emits `DeprecationWarning`).
 
 ### `exceptions.py`
 ```
-AdarvMapsError
+AdarvMapError
 ├── ColumnNotFoundError   # lat/lon/outcome column can't be found or is invalid
 └── NoCasePointsError     # no rows match the chosen case value
 ```
@@ -212,14 +212,14 @@ AdarvMapsError
 
 ## 5. Public API surface
 
-Exported from `adarvmaps/__init__.py`:
+Exported from `adarvmap/__init__.py`:
 
 | Name | Kind | Notes |
 |---|---|---|
-| `AdarvMaps` | class | main entry point |
-| `adarvmaps_run` | function | interactive terminal wizard |
-| `run_interactive` | function | **deprecated** alias of `adarvmaps_run` |
-| `AdarvMapsError` | exception | base class |
+| `AdarvMap` | class | main entry point |
+| `adarvmap_run` | function | interactive terminal wizard |
+| `run_interactive` | function | **deprecated** alias of `adarvmap_run` |
+| `AdarvMapError` | exception | base class |
 | `ColumnNotFoundError` | exception | |
 | `NoCasePointsError` | exception | |
 
@@ -231,7 +231,7 @@ Runtime deps (`pyproject.toml`): `folium`, `geopandas`, `numpy`, `pandas`,
 `shapely`, `openpyxl` (Excel support). `app.py` additionally needs `streamlit`.
 Python ≥ 3.9.
 
-Boundary data ships inside the wheel under `adarvmaps/data/` as FlatGeobuf
+Boundary data ships inside the wheel under `adarvmap/data/` as FlatGeobuf
 (`.fgb`) files, so no shapefile setup is required by the user. `load_boundaries`
 sets `SHAPE_RESTORE_SHX=YES` for resilience when custom shapefiles are passed.
 
@@ -241,17 +241,17 @@ sets `SHAPE_RESTORE_SHX=YES` for resilience when custom shapefiles are passed.
 
 **CLI was completely broken — keyword-argument mismatch.**
 
-`cli.py` constructed `AdarvMaps(..., lon_col=args.lon_col, ...)`, but the
-`AdarvMaps.__init__` keyword is `long_col` (keyword-only). Every CLI invocation
+`cli.py` constructed `AdarvMap(..., lon_col=args.lon_col, ...)`, but the
+`AdarvMap.__init__` keyword is `long_col` (keyword-only). Every CLI invocation
 therefore crashed before producing a map:
 
 ```
-Error: AdarvMaps.__init__() got an unexpected keyword argument 'lon_col'.
+Error: AdarvMap.__init__() got an unexpected keyword argument 'lon_col'.
 Did you mean 'long_col'?
 ```
 
 **Fix:** map the `--lon-col` argument to the correct keyword in
-[adarvmaps/cli.py](adarvmaps/cli.py):
+[adarvmap/cli.py](adarvmap/cli.py):
 
 ```diff
 -            lon_col=args.lon_col,
@@ -263,7 +263,7 @@ The `README.md` Python-API reference was also updated from `lon_col=None` to
 interactive wizard were already passing `long_col` correctly and were
 unaffected.
 
-Verified after the fix: `adarvmaps data.csv -o map.html` and the explicit
+Verified after the fix: `adarvmap data.csv -o map.html` and the explicit
 `--lat-col/--lon-col/--case-value` form both produce maps; combined-column and
 `y`/`x` auto-detection paths also build successfully.
 
@@ -276,7 +276,7 @@ Verified after the fix: `adarvmaps data.csv -o map.html` and the explicit
   adding `pytest` cases for: CLI smoke test, combined-column detection,
   lat/lon swap warning, and `NoCasePointsError`.
 - **Naming consistency.** Consider accepting `lon_col` as an alias for
-  `long_col` in `AdarvMaps.__init__` so the public kwarg matches the common
+  `long_col` in `AdarvMap.__init__` so the public kwarg matches the common
   ecosystem spelling and the `--lon-col` flag.
 - **`dist/` artifacts** for old versions (0.1.10–0.1.12) are checked into the
   working tree; consider `.gitignore`-ing `dist/`.

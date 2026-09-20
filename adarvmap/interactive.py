@@ -1,8 +1,8 @@
 """Interactive prompt-based wrapper for non-coders.
 
 Usage:
-    from adarvmaps import adarvmaps_run
-    adarvmaps_run()
+    from adarvmap import adarvmap_run
+    adarvmap_run()
 """
 
 import os
@@ -12,7 +12,7 @@ from datetime import datetime
 import pandas as pd
 
 from .exceptions import NoCasePointsError, ColumnNotFoundError
-from .map_builder import AdarvMaps
+from .map_builder import AdarvMap
 
 
 def _default_output() -> str:
@@ -436,7 +436,7 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
     print("\n⚙️  Building the map...")
     all_cases = outcome_col == _NO_OUTCOME
     try:
-        sm = AdarvMaps(
+        sm = AdarvMap(
             df,
             lat_col=lat_col,
             long_col=long_col,
@@ -470,7 +470,7 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
     except Exception as e:  # noqa: BLE001
         _err(f"Something went wrong: {e}")
         _info("If this keeps happening, report it at:")
-        _info("  https://github.com/ADARV-Epi-hub/adarvmaps/issues")
+        _info("  https://github.com/ADARV-Epi-hub/adarvmap/issues")
     return False
 
 
@@ -478,8 +478,8 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
 # MAIN ENTRY POINT
 # =========================================================
 
-def adarvmaps_run(output_path: str = None) -> None:
-    """Run an interactive prompt-based wizard to build a AdarvMaps.
+def adarvmap_run(output_path: str = None) -> None:
+    """Run an interactive prompt-based wizard to build a AdarvMap.
 
     Designed for users who don't want to write Python code.  Each step
     catches errors and lets the user retry instead of crashing.
@@ -494,7 +494,7 @@ def adarvmaps_run(output_path: str = None) -> None:
         output_path = _default_output()
     print()
     _line("═")
-    print("   🗺️  Welcome to AdarvMaps  (by ADARV)")
+    print("   🗺️  Welcome to AdarvMap  (by ADARV)")
     print("   Let's turn your data into an interactive map — no coding needed.")
     print("   Just answer a few quick questions below.")
     _line("═")
@@ -552,16 +552,16 @@ def adarvmaps_run(output_path: str = None) -> None:
 
 
 def run_interactive(output_path: str = None) -> None:
-    """Deprecated alias for :func:`adarvmaps_run`.
+    """Deprecated alias for :func:`adarvmap_run`.
 
     .. deprecated:: 0.1.11
-       Use :func:`adarvmaps_run` instead. ``run_interactive`` will be removed
+       Use :func:`adarvmap_run` instead. ``run_interactive`` will be removed
        in a future release.
     """
     warnings.warn(
-        "run_interactive() is deprecated; use adarvmaps_run() instead. "
+        "run_interactive() is deprecated; use adarvmap_run() instead. "
         "run_interactive will be removed in a future release.",
         DeprecationWarning,
         stacklevel=2,
     )
-    return adarvmaps_run(output_path=output_path)
+    return adarvmap_run(output_path=output_path)

@@ -1,12 +1,12 @@
-# AdarvMaps
+# AdarvMap
 
 **Interactive epidemiological spot maps for India — no GIS software, no shapefiles, no setup.**
 
-[![PyPI version](https://img.shields.io/pypi/v/adarvmaps.svg)](https://pypi.org/project/adarvmaps/)
-[![Python versions](https://img.shields.io/pypi/pyversions/adarvmaps.svg)](https://pypi.org/project/adarvmaps/)
-[![License: MIT](https://img.shields.io/pypi/l/adarvmaps.svg)](https://github.com/ADARV-Epi-hub/adarvmaps/blob/main/LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/adarvmap.svg)](https://pypi.org/project/adarvmap/)
+[![Python versions](https://img.shields.io/pypi/pyversions/adarvmap.svg)](https://pypi.org/project/adarvmap/)
+[![License: MIT](https://img.shields.io/pypi/l/adarvmap.svg)](https://github.com/ADARV-Epi-hub/adarvmap/blob/main/LICENSE)
 
-AdarvMaps turns a spreadsheet of latitude and longitude from the field into a polished,
+AdarvMap turns a spreadsheet of latitude and longitude from the field into a polished,
 interactive HTML map. You can open the map in any browser, make edits, and download it as
 a **PNG** image or **PDF**. India's state and district boundaries are already built in, so
 you don't have to search for shapefiles.
@@ -19,9 +19,9 @@ you don't have to search for shapefiles.
 
 ---
 
-## What will AdarvMaps do?
+## What will AdarvMap do?
 
-AdarvMaps turns your spreadsheet into an interactive map. It automatically places every
+AdarvMap turns your spreadsheet into an interactive map. It automatically places every
 row as a **dot** at its location, draws the correct **state and district boundaries**, and
 colours the groups (e.g. cases and controls) differently. It then generates a single,
 self-contained **HTML** file you can open in any browser to fine-tune your map — and you
@@ -54,44 +54,44 @@ both on the same map.
 
 This guide is for anyone who wants a map but has never written any code. You don't need to
 install anything on your computer. You'll copy and paste two lines of template code, and
-then AdarvMaps will guide you through the rest with a few plain-English questions.
+then AdarvMap will guide you through the rest with a few plain-English questions.
 
 ### Step 1 — Open a free notebook
 Go to **[colab.research.google.com](https://colab.research.google.com)** and click
 **New notebook**. Google Colab is a free service that runs code in your web browser, so
 there's nothing to install. You'll see an empty box called a *cell*.
 
-### Step 2 — Start AdarvMaps
+### Step 2 — Start AdarvMap
 Click inside the cell, paste the two lines below, and press the ▶ (play) button:
 ```python
-!pip install adarvmaps
-import adarvmaps; adarvmaps.run()
+!pip install adarvmap
+import adarvmap; adarvmap.run()
 ```
-The first line installs AdarvMaps; the second starts the guided wizard. Depending on your
+The first line installs AdarvMap; the second starts the guided wizard. Depending on your
 internet speed, the install may take a little while.
 
 ### Step 3 — Answer the questions
-AdarvMaps asks **five** questions. Each shows its own best guess — press **Enter** to
+AdarvMap asks **five** questions. Each shows its own best guess — press **Enter** to
 accept it, or type the number of the correct choice.
 
 1. **Upload your data file**
    - In Colab (or Jupyter / VS Code) an *Upload* button appears — click it and pick your
      spreadsheet (CSV, Excel `.xlsx` / `.xls`, or TSV).
-   - AdarvMaps prints a quick summary — the number of rows and columns, each column name
+   - AdarvMap prints a quick summary — the number of rows and columns, each column name
      with an example value, and the first few rows — so you can confirm it read your file.
    - **FAQ: Is my data uploaded to a server?** On **Colab**, yes — Colab runs on Google's
      cloud, so your file is processed on Google's servers (see the privacy note below). If
-     your data must stay private, **run AdarvMaps locally** instead (see Guide for
+     your data must stay private, **run AdarvMap locally** instead (see Guide for
      developers) — nothing leaves your computer.
 
 2. **Which column has the latitude?**
    - Latitude is the north–south number (for example, `28.61` for Delhi).
-   - AdarvMaps pre-selects the column it thinks is latitude — press Enter to accept, or, if
+   - AdarvMap pre-selects the column it thinks is latitude — press Enter to accept, or, if
      the guess is wrong, check the summary above and type the number of the right column.
 
 3. **Which column has the longitude?**
    - Longitude is the east–west number (for example, `77.20` for Delhi).
-   - AdarvMaps pre-selects its best guess — accept it or pick another.
+   - AdarvMap pre-selects its best guess — accept it or pick another.
    - **Remember:** if the points later look misplaced, the most common cause is that
      latitude and longitude are swapped.
 
@@ -104,13 +104,13 @@ accept it, or type the number of the correct choice.
      the same*.
 
 5. **Which value is the main group?**
-   - AdarvMaps lists the values found in the column you chose. Tell it which one is the
+   - AdarvMap lists the values found in the column you chose. Tell it which one is the
      **main group** (it's the highlighted / clustered group; for example, if you coded
      `1 = Case, 0 = Control`, choose `1`).
    - Every other value becomes the other group, shown with its own name.
 
 ### Step 4 — Get your map
-- Your map appears right below the cell and is saved as a file called `adarvmaps.html`.
+- Your map appears right below the cell and is saved as a file called `adarvmap.html`.
 - Download it and open it in any browser, or email it to a colleague — it's a single
   self-contained file (an internet connection is needed to load the background map tiles).
 - Using the map's sidebar you can: switch between **Spot Map** and **Dot Density**, show one
@@ -123,25 +123,25 @@ accept it, or type the number of the correct choice.
 
 ### Install
 ```bash
-pip install adarvmaps
+pip install adarvmap
 ```
 Python 3.9+.
 
 ### Usage
 ```python
-from adarvmaps import AdarvMaps
+from adarvmap import AdarvMap
 
 # `data` accepts a CSV path or a pandas DataFrame
-AdarvMaps("my_data.csv").build().save("map.html")
+AdarvMap("my_data.csv").build().save("map.html")
 ```
 
 Or from the command line:
 ```bash
-adarvmaps my_data.csv -o map.html
+adarvmap my_data.csv -o map.html
 ```
 
 ### Common options
-`AdarvMaps(data, ...)` — all options below are keyword arguments:
+`AdarvMap(data, ...)` — all options below are keyword arguments:
 
 | Option | Default | Description |
 |---|---|---|
@@ -152,9 +152,9 @@ adarvmaps my_data.csv -o map.html
 | `case_color`, `control_color`, `cluster_color` | ADARV palette | Marker colours (hex) |
 | `state_shp`, `district_shp` | bundled | Use your own boundary files |
 
-**Full API and CLI reference →** [DOCUMENTATION.md](https://github.com/ADARV-Epi-hub/adarvmaps/blob/main/DOCUMENTATION.md)
+**Full API and CLI reference →** [DOCUMENTATION.md](https://github.com/ADARV-Epi-hub/adarvmap/blob/main/DOCUMENTATION.md)
 
-> 🔒 **Privacy:** running AdarvMaps locally keeps your data on your machine — nothing is
+> 🔒 **Privacy:** running AdarvMap locally keeps your data on your machine — nothing is
 > uploaded. Google Colab is convenient but runs on Google's cloud, so use it only for
 > de-identified or demo data.
 
@@ -162,10 +162,10 @@ adarvmaps my_data.csv -o map.html
 
 ## Preparing your data (details)
 
-AdarvMaps reads a CSV and **auto-detects** the columns — you don't have to rename anything.
+AdarvMap reads a CSV and **auto-detects** the columns — you don't have to rename anything.
 At a minimum it needs **location** and, optionally, an **outcome**:
 
-| What AdarvMaps needs | Possible column names | How to provide it |
+| What AdarvMap needs | Possible column names | How to provide it |
 |---|---|---|
 | **Coordinates** | `lat`, `lon` (or `latitude`, `longitude`) | Separate `lat` / `lon` columns **or** one combined `"lat,lon"` column |
 | **Outcome** (optional) | `outcome`, `status`, `case_control`, `case` | A column with values like `case` / `control` |
@@ -190,7 +190,7 @@ and resize markers, toggle **place-name labels**, and export to **PNG / PDF**.
 
 ## ADARV Team
 
-AdarvMaps is developed by the **ADARV** team: **Muniraj Mallesan** (maintainer),
+AdarvMap is developed by the **ADARV** team: **Muniraj Mallesan** (maintainer),
 **Dr. Sharan Murali** (team lead), Manikandan K, Shanmuga Sundharam, Yogita Chaudhary,
 Barath U, Balaji S, and Deepana R.
 

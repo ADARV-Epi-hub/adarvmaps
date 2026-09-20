@@ -116,7 +116,7 @@ def add_marker_layers(
     Note: pin *colours* are deliberately not set here.  Markers are drawn
     client-side by the sidebar JavaScript (``makePinIcon(window.caseColor)``)
     so the viewer can recolour them live, so the case/control colours are
-    passed to :func:`~adarvmaps.sidebar.build_sidebar_html` instead.
+    passed to :func:`~adarvmap.sidebar.build_sidebar_html` instead.
 
     Returns:
         (cluster_layer, pins_cases_layer, pins_controls_layer)

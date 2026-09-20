@@ -14,14 +14,14 @@ import pytest
 pytest.importorskip("geopandas")
 pytest.importorskip("folium")
 
-from adarvmaps import AdarvMaps  # noqa: E402
-from adarvmaps.interactive import (  # noqa: E402
+from adarvmap import AdarvMap  # noqa: E402
+from adarvmap.interactive import (  # noqa: E402
     _LAT_NAMES,
     _LONG_NAMES,
     _default_output,
     _guess,
 )
-from adarvmaps.loader import detect_lat_lon  # noqa: E402
+from adarvmap.loader import detect_lat_lon  # noqa: E402
 
 
 # --------------------------------------------------------------------------
@@ -70,7 +70,7 @@ def _grouped_df():
 
 def test_group_labels_default_to_the_data_values():
     html = (
-        AdarvMaps(_grouped_df(), outcome_col="status", case_value="Dead")
+        AdarvMap(_grouped_df(), outcome_col="status", case_value="Dead")
         .build().map.get_root().render()
     )
     assert ">Dead<" in html and ">Alive<" in html
@@ -81,7 +81,7 @@ def test_group_labels_default_to_the_data_values():
 
 def test_explicit_labels_override_the_data_values():
     html = (
-        AdarvMaps(
+        AdarvMap(
             _grouped_df(), outcome_col="status", case_value="Dead",
             case_label="Deceased", control_label="Survived",
         ).build().map.get_root().render()
@@ -105,7 +105,7 @@ def test_print_resizes_map_before_printing():
     blank grey bands. An open pop-up must also not be baked into the page.
     """
     df = pd.DataFrame({"lat": [11.0], "lon": [76.9], "case_control": ["case"]})
-    html = AdarvMaps(df).build().map.get_root().render()
+    html = AdarvMap(df).build().map.get_root().render()
     assert "invalidateSize" in html
     assert "closePopup" in html
     assert "beforeprint" in html          # covers Ctrl+P too
@@ -117,7 +117,7 @@ def test_screenshoter_cdn_script_is_version_pinned():
     """An unversioned CDN URL would let an upstream release silently break
     PNG export in every map already generated."""
     df = pd.DataFrame({"lat": [11.0], "lon": [76.9], "case_control": ["case"]})
-    html = AdarvMaps(df).build().map.get_root().render()
+    html = AdarvMap(df).build().map.get_root().render()
     assert "leaflet-simple-map-screenshoter@" in html
 
 
@@ -131,7 +131,7 @@ def test_import_does_not_write_to_stdout():
     Printing on import corrupts any script that emits CSV/JSON on stdout.
     """
     proc = subprocess.run(
-        [sys.executable, "-c", "import adarvmaps; print('SENTINEL')"],
+        [sys.executable, "-c", "import adarvmap; print('SENTINEL')"],
         capture_output=True, text=True, check=True,
     )
     assert proc.stdout.strip() == "SENTINEL"

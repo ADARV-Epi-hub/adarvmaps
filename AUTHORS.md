@@ -1,6 +1,6 @@
 # Authors
 
-AdarvMaps is developed and maintained by the **ADARV** team.
+AdarvMap is developed and maintained by the **ADARV** team.
 
 | Name | Role |
 |---|---|
