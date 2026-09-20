@@ -143,9 +143,12 @@ def build_sidebar_html(
     .leaflet-top {{ top: 0 !important; }}
     #map-legend {{
         display: block !important; position: absolute; top: 10px; left: 10px;
+        bottom: auto !important;   /* without this the box stretches top..bottom */
         background: #fff !important; border: 1px solid #ccc;
     }}
     .legend-icon {{ border: 1px solid #333 !important; }}
+    /* never bake an open pop-up into the printed page / PDF */
+    .leaflet-popup {{ display: none !important; }}
     .leaflet-control-zoom, .leaflet-control-attribution {{ display: none !important; }}
     .cluster-icon > div, .marker-cluster div {{ box-shadow: none !important; }}
 }}
@@ -405,7 +408,30 @@ window.addEventListener('load', function() {{
 
   byId('recenterBtn').addEventListener('click', function() {{ mapObj.setView(initCenter, initZoom); }});
 
-  byId('downloadPrintLink').addEventListener('click', function() {{ closeAllMenus(); window.print(); }});
+  // Printing needs preparation. Switching to the print layout resizes the map
+  // container, but Leaflet still only holds tiles for the size it last knew
+  // about — which is why an unprepared print comes out with large blank grey
+  // areas. So: close any open pop-up, tell Leaflet to re-measure, give the new
+  // tiles a moment to arrive, and only then print.
+  function preparePrint(done) {{
+    try {{ mapObj.closePopup(); }} catch (e) {{}}
+    try {{ mapObj.invalidateSize(); }} catch (e) {{}}
+    setTimeout(done, 900);
+  }}
+
+  byId('downloadPrintLink').addEventListener('click', function() {{
+    closeAllMenus();
+    preparePrint(function() {{ window.print(); }});
+  }});
+
+  // Same treatment when printing straight from the browser (Ctrl+P), where we
+  // don't control the timing.
+  window.addEventListener('beforeprint', function() {{
+    try {{ mapObj.closePopup(); mapObj.invalidateSize(); }} catch (e) {{}}
+  }});
+  window.addEventListener('afterprint', function() {{
+    try {{ mapObj.invalidateSize(); }} catch (e) {{}}
+  }});
   byId('downloadPngLink').addEventListener('click', function() {{
     closeAllMenus();
     var tb = byId('sm-toolbar');

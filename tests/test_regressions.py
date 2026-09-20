@@ -97,6 +97,22 @@ def test_default_output_filename_is_dated_ddmmyy():
     assert re.fullmatch(r"adarvmap_\d{6}\.html", _default_output())
 
 
+def test_print_resizes_map_before_printing():
+    """Printing must re-measure the map first.
+
+    The print layout resizes the container; without invalidateSize() Leaflet
+    still holds tiles only for the old size, so the PDF came out with large
+    blank grey bands. An open pop-up must also not be baked into the page.
+    """
+    df = pd.DataFrame({"lat": [11.0], "lon": [76.9], "case_control": ["case"]})
+    html = AdarvMaps(df).build().map.get_root().render()
+    assert "invalidateSize" in html
+    assert "closePopup" in html
+    assert "beforeprint" in html          # covers Ctrl+P too
+    assert ".leaflet-popup" in html       # hidden by the print stylesheet
+    assert "bottom: auto !important" in html  # legend must not stretch
+
+
 def test_screenshoter_cdn_script_is_version_pinned():
     """An unversioned CDN URL would let an upstream release silently break
     PNG export in every map already generated."""
