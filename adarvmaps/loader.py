@@ -186,7 +186,7 @@ def load_csv(
     Returns:
         (df, lat_col, long_col, outcome_col, case_value)
     """
-    if isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame):  # noqa: SIM108 (clearer than a ternary)
         df = data.copy()
     else:
         df = _read_data_file(data)

@@ -187,7 +187,7 @@ class AdarvMaps:
             )
 
         # 5. Determine mode + crop boundaries
-        mode, affected_dist_names, unique_state_names, bounds = determine_mode(
+        _mode, affected_dist_names, unique_state_names, bounds = determine_mode(
             points_cases, district_name_col, state_name_col, self.count_cutoff
         )
 
@@ -255,8 +255,6 @@ class AdarvMaps:
             state_name_col,
             district_name_col,
             cluster_color=self.cluster_color,
-            case_color=self.case_color,
-            control_color=self.control_color,
             case_label=case_label,
             control_label=control_label,
         )
@@ -268,9 +266,6 @@ class AdarvMaps:
             pins_cases_name=pins_cases.get_name(),
             pins_controls_name=pins_controls.get_name(),
             labels_name=labels_layer.get_name(),
-            mode=mode,
-            n_cases=len(points_cases),
-            n_controls=len(points_controls),
             cluster_color=self.cluster_color,
             case_color=self.case_color,
             control_color=self.control_color,

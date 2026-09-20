@@ -8,7 +8,6 @@ Usage:
 import os
 import warnings
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
 
@@ -86,7 +85,7 @@ def _ask(prompt: str, default: str = None, allow_blank: bool = False) -> str:
             value = input(f"{prompt}{suffix}: ").strip().strip('"').strip("'")
         except (KeyboardInterrupt, EOFError):
             print("\n\nCancelled by user.")
-            raise SystemExit(0)
+            raise SystemExit(0) from None
 
         if value:
             return value
@@ -431,44 +430,6 @@ def _step_pick_case_value(df: pd.DataFrame, outcome_col: str) -> str:
     return case_value
 
 
-def _step_output_path() -> str:
-    """Step 4 — where to save the HTML."""
-    while True:
-        path = _ask(
-            "\n💾 Where to save the map (HTML file)",
-            default=_default_output(),
-        )
-        if not path.lower().endswith(".html"):
-            path += ".html"
-            _info(f"Added .html → {path}")
-        out = Path(path)
-        if out.parent and not out.parent.exists():
-            create = _ask(
-                f"📂 Folder '{out.parent}' doesn't exist. Create it? (y/n)",
-                default="y",
-            )
-            if create.lower().startswith("y"):
-                try:
-                    out.parent.mkdir(parents=True, exist_ok=True)
-                    _ok(f"Created folder: {out.parent}")
-                except Exception as e:  # noqa: BLE001
-                    _err(f"Could not create folder: {e}")
-                    continue
-            else:
-                continue
-        # Test write permission
-        try:
-            with open(path, "a"):
-                pass
-            os.remove(path) if os.path.getsize(path) == 0 else None
-        except PermissionError:
-            _err(f"No write permission for: {path}")
-            continue
-        except Exception:
-            pass
-        return path
-
-
 def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
                     case_label=None, control_label=None):
     """Step 5 — actually build the map."""
@@ -563,7 +524,7 @@ def adarvmaps_run(output_path: str = None) -> None:
         retry = _ask("\nTry again with different settings? (y/n)", default="n")
         if not retry.lower().startswith("y"):
             print("\nExiting. No map was created.")
-            return None
+            return
         # Re-prompt for whatever they want to fix
         print("\nLet's redo the setup:")
         lat_col, long_col, outcome_col = _step_pick_columns(df)

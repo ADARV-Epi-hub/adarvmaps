@@ -138,9 +138,8 @@ def test_load_csv_all_bad_coordinates_errors():
         "lon": [77.0, 77.1],
         "case_control": ["case", "control"],
     })
-    with pytest.warns(UserWarning):
-        with pytest.raises(ValueError, match="All rows"):
-            load_csv(df)
+    with pytest.warns(UserWarning), pytest.raises(ValueError, match="All rows"):
+        load_csv(df)
 
 
 def test_load_csv_all_cases_skips_outcome_detection():

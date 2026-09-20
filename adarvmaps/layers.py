@@ -65,7 +65,7 @@ def add_boundary_layers(
         india_outline,
         name="India Border",
         control=False,
-        style_function=lambda x: {
+        style_function=lambda x: {  # noqa: ARG005 (folium API)
             "fillOpacity": 0.0,
             "color": "#000000",
             "weight": 1,
@@ -77,7 +77,7 @@ def add_boundary_layers(
         affected_states,
         name="Affected States",
         control=False,
-        style_function=lambda x: {
+        style_function=lambda x: {  # noqa: ARG005 (folium API)
             "fillOpacity": 0.05,
             "color": "#4B0082",
             "weight": 1.5,
@@ -89,7 +89,7 @@ def add_boundary_layers(
         affected_districts,
         name="Affected Districts",
         control=False,
-        style_function=lambda x: {
+        style_function=lambda x: {  # noqa: ARG005 (folium API)
             "color": "#000000",
             "weight": 1,
             "fillOpacity": 0.01,
@@ -105,8 +105,6 @@ def add_marker_layers(
     state_name_col: str,
     district_name_col: str,
     cluster_color: str,
-    case_color: str,
-    control_color: str,
     case_label: str = "Case",
     control_label: str = "Control",
 ):
@@ -114,6 +112,11 @@ def add_marker_layers(
 
     *case_label* / *control_label* are the words shown for the two groups in
     each pin's popup (e.g. "Male" / "Female"); they default to Case / Control.
+
+    Note: pin *colours* are deliberately not set here.  Markers are drawn
+    client-side by the sidebar JavaScript (``makePinIcon(window.caseColor)``)
+    so the viewer can recolour them live, so the case/control colours are
+    passed to :func:`~adarvmaps.sidebar.build_sidebar_html` instead.
 
     Returns:
         (cluster_layer, pins_cases_layer, pins_controls_layer)
