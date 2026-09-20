@@ -31,8 +31,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "-o", "--output",
-        default="adarvmaps_output.html",
-        help="Output HTML file path (default: adarvmaps_output.html).",
+        default=None,
+        help="Output HTML file path (default: a dated file, e.g. adarvmap_200926.html).",
     )
     p.add_argument("--state-shp", default=None, help="Custom state boundary file.")
     p.add_argument("--district-shp", default=None, help="Custom district boundary file.")
@@ -85,7 +85,9 @@ def main(argv=None) -> None:
         return
 
     from .map_builder import AdarvMaps
+    from .interactive import _default_output
 
+    output = args.output or _default_output()
     try:
         AdarvMaps(
             args.csv,
@@ -101,8 +103,8 @@ def main(argv=None) -> None:
             control_color=args.control_color,
             case_label=args.case_label,
             control_label=args.control_label,
-        ).build().save(args.output)
-        print(f"Map saved to: {args.output}")
+        ).build().save(output)
+        print(f"Map saved to: {output}")
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)

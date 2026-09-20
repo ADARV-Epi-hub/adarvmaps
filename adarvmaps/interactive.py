@@ -7,12 +7,18 @@ Usage:
 
 import os
 import warnings
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 
 from .exceptions import NoCasePointsError, ColumnNotFoundError
 from .map_builder import AdarvMaps
+
+
+def _default_output() -> str:
+    """Default map filename, dated DDMMYY — e.g. ``adarvmap_200926.html``."""
+    return f"adarvmap_{datetime.now():%d%m%y}.html"
 
 
 # =========================================================
@@ -416,7 +422,7 @@ def _step_output_path() -> str:
     while True:
         path = _ask(
             "\n💾 Where to save the map (HTML file)",
-            default="adarvmaps_output.html",
+            default=_default_output(),
         )
         if not path.lower().endswith(".html"):
             path += ".html"
@@ -497,10 +503,7 @@ def _step_build_map(df, lat_col, long_col, outcome_col, case_value, output_path,
 # MAIN ENTRY POINT
 # =========================================================
 
-_DEFAULT_OUTPUT = "adarvmaps.html"
-
-
-def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
+def adarvmaps_run(output_path: str = None) -> None:
     """Run an interactive prompt-based wizard to build a AdarvMaps.
 
     Designed for users who don't want to write Python code.  Each step
@@ -509,9 +512,11 @@ def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
     Parameters
     ----------
     output_path:
-        Where to save the HTML map.  Defaults to ``adarvmaps.html`` in the
-        current directory.
+        Where to save the HTML map.  When omitted, defaults to a dated file
+        in the current directory, e.g. ``adarvmap_200926.html``.
     """
+    if output_path is None:
+        output_path = _default_output()
     print()
     _line("═")
     print("   🗺️  Welcome to AdarvMaps  (by ADARV)")
@@ -571,7 +576,7 @@ def adarvmaps_run(output_path: str = _DEFAULT_OUTPUT) -> None:
     _line()
 
 
-def run_interactive(output_path: str = _DEFAULT_OUTPUT) -> None:
+def run_interactive(output_path: str = None) -> None:
     """Deprecated alias for :func:`adarvmaps_run`.
 
     .. deprecated:: 0.1.11
