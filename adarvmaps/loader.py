@@ -59,6 +59,26 @@ def _detect_from_combined(df: pd.DataFrame, col: str):
     return pd.Series(lat, index=df.index), pd.Series(lon, index=df.index)
 
 
+def _match_col(cols, candidates):
+    """Pick the column best matching *candidates*.
+
+    Exact name match wins first (so a column named ``lat`` beats an earlier
+    one that merely contains "y"); only then a substring match, and only for
+    aliases of length >= 3 so single-letter aliases like ``x`` / ``y`` match
+    exactly rather than any column that happens to contain that letter.
+    """
+    lowers = [str(c).lower().strip() for c in cols]
+    for name in candidates:
+        for i, lc in enumerate(lowers):
+            if lc == name:
+                return cols[i]
+    long_names = [n for n in candidates if len(n) >= 3]
+    for i, lc in enumerate(lowers):
+        if any(name in lc for name in long_names):
+            return cols[i]
+    return None
+
+
 def detect_lat_lon(df: pd.DataFrame, lat_col: str = None, long_col: str = None):
     """Return (lat_col_name, long_col_name) after detection or validation."""
     cols = list(df.columns)
@@ -80,16 +100,10 @@ def detect_lat_lon(df: pd.DataFrame, lat_col: str = None, long_col: str = None):
 
     # Separate numeric columns
     numeric_cols = [c for c in cols if _is_float_col(df, c)]
-    found_lat, found_lon = None, None
+    found_lat = _match_col(numeric_cols, _LAT_NAMES)
+    found_lon = _match_col(numeric_cols, _LON_NAMES)
 
-    for c in numeric_cols:
-        c_lower = c.lower()
-        if any(name in c_lower for name in _LAT_NAMES):
-            found_lat = c
-        if any(name in c_lower for name in _LON_NAMES):
-            found_lon = c
-
-    if found_lat and found_lon:
+    if found_lat and found_lon and found_lat != found_lon:
         return found_lat, found_lon
 
     if len(numeric_cols) == 2:

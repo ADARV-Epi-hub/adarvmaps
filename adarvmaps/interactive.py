@@ -140,10 +140,24 @@ _OUT_NAMES  = ["outcome", "status", "case_control", "class", "result"]
 
 
 def _guess(columns: list, candidates: list) -> int:
-    """Return index of best-matching column name, or 0 if none found."""
-    for i, c in enumerate(columns):
-        lc = c.lower()
-        if any(name in lc for name in candidates):
+    """Return index of the best-matching column name, or 0 if none found.
+
+    An **exact** name match wins first (so a column literally named ``lat`` is
+    picked over some earlier column that merely contains the letter "y").
+    Only then do we fall back to a substring match, and only for aliases of
+    length >= 3 — this stops single-letter aliases like ``x`` / ``y`` from
+    matching unrelated columns (e.g. "study", "day", "type").
+    """
+    lowers = [c.lower().strip() for c in columns]
+    # 1. exact match
+    for name in candidates:
+        for i, lc in enumerate(lowers):
+            if lc == name:
+                return i
+    # 2. substring match, only for longer aliases
+    long_names = [n for n in candidates if len(n) >= 3]
+    for i, lc in enumerate(lowers):
+        if any(name in lc for name in long_names):
             return i
     return 0
 
