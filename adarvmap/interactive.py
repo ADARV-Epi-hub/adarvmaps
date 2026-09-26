@@ -325,11 +325,11 @@ def _step_pick_columns(df: pd.DataFrame):
     print("🏥 Step 4 — Which column is your grouping variable?")
     print("   (the column that splits the data into two groups — e.g.")
     print("    case/control, male/female, dead/alive, positive/negative)")
-    print("   If you don't want any split, pick the first option below.")
+    print("   If your data is all cases (no control group), pick the first option below.")
     print("─" * 55)
-    no_outcome_label = "No grouping — show all rows the same"
+    no_outcome_label = "My data is all cases (no control group)"
     cols_with_none = [no_outcome_label] + cols
-    previews_with_none = ["All rows shown the same"] + previews
+    previews_with_none = ["All rows treated as cases"] + previews
     outcome_choice = _ask_choice(
         "Your grouping variable",
         cols_with_none,
@@ -510,7 +510,7 @@ def adarvmap_run(output_path: str = None) -> None:
     # Group labels are taken automatically from the data values in build().
     if outcome_col == _NO_OUTCOME:
         case_value = None
-        _info(f"No grouping — showing all {len(df)} rows the same.")
+        _info(f"Treating all {len(df)} rows as cases (no controls).")
     else:
         case_value = _step_pick_case_value(df, outcome_col)
 
@@ -530,7 +530,7 @@ def adarvmap_run(output_path: str = None) -> None:
         lat_col, long_col, outcome_col = _step_pick_columns(df)
         if outcome_col == _NO_OUTCOME:
             case_value = None
-            _info(f"No grouping — showing all {len(df)} rows the same.")
+            _info(f"Treating all {len(df)} rows as cases (no controls).")
         else:
             case_value = _step_pick_case_value(df, outcome_col)
 

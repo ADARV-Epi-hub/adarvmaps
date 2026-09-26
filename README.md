@@ -100,8 +100,8 @@ accept it, or type the number of the correct choice.
      *affected* / *not affected*, *male* / *female*, *dead* / *alive*, *positive* /
      *negative*, and so on. The map uses the **actual values from your data** as the group
      names automatically — you don't have to type anything.
-   - If you don't want any split, choose the first option: *No grouping — show all rows
-     the same*.
+   - If your data is all cases with no control group, choose the first option: *My data is
+     all cases (no control group)*.
 
 5. **Which value is the main group?**
    - AdarvMap lists the values found in the column you chose. Tell it which one is the

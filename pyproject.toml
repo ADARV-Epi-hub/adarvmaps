@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adarvmap"
-version = "0.1.41"
+version = "0.1.42"
 description = "Interactive epidemiological spot maps for India"
 readme = "README.md"
 license = { file = "LICENSE" }
