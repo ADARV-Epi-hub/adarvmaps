@@ -1,282 +1,209 @@
-# AdarvMap — Developer Documentation
+# AdarvMap — Reference
 
-Internal/architecture guide for the **adarvmap** package. For installation and
-end-user usage, see [README.md](README.md). This document explains how the code
-is organised, how data flows through the pipeline, and the conventions a
-contributor needs to know.
+This is the full reference for developers using **adarvmap** in Python or from
+the command line. If you just want to make a map without writing code, start
+with the [README](README.md) instead.
 
----
-
-## 1. What AdarvMap does
-
-AdarvMap turns a table of case/control coordinates into a self-contained
-interactive HTML map for India. Each row becomes a point; points are spatially
-joined to bundled state and district boundaries, split into cases vs. controls,
-and rendered with [Folium](https://python-visualization.github.io/folium/)
-(Leaflet under the hood). The output HTML embeds a sidebar (mode toggle, colour
-pickers, pin-size slider, PNG/PDF export) and needs no server to view.
-
-Two presentation modes share the same data:
-
-- **Dot density** — a `MarkerCluster` of cases whose bubble colour deepens with
-  local case count.
-- **Spot pins** — individual teardrop pins for cases and (optionally) controls.
+- [Install](#install)
+- [Three ways to use it](#three-ways-to-use-it)
+- [Python: all the options](#python-all-the-options)
+- [Command line](#command-line)
+- [Your data](#your-data)
+- [Naming the two groups](#naming-the-two-groups)
+- [Using your own boundaries](#using-your-own-boundaries)
+- [Errors you might see](#errors-you-might-see)
+- [How it works (in plain English)](#how-it-works-in-plain-english)
+- [For contributors](#for-contributors)
 
 ---
 
-## 2. Project layout
+## Install
 
+```bash
+pip install adarvmap
 ```
-adarvmap/
-├── adarvmap/                  # the installable package
-│   ├── __init__.py           # public exports + __version__
-│   ├── map_builder.py        # AdarvMap class — orchestrates the pipeline
-│   ├── loader.py             # file reading + column/case auto-detection
-│   ├── spatial.py            # boundary loading, spatial join, mode/zoom logic
-│   ├── layers.py             # Folium cluster + pin layer builders
-│   ├── sidebar.py            # generated HTML/CSS/JS control panel
-│   ├── interactive.py        # adarvmap_run() terminal wizard for non-coders
-│   ├── cli.py                # `adarvmap` console-script entry point
-│   ├── exceptions.py         # AdarvMapError hierarchy
-│   └── data/                 # bundled India boundaries (FlatGeobuf)
-│       ├── state_boundary_lite.fgb
-│       └── district_boundary_lite.fgb
-├── app.py                    # Streamlit web front-end (uses the package)
-├── tests/                    # (currently empty — see §8)
-├── pyproject.toml            # build metadata + dependencies
-├── requirements.txt          # deps for running app.py / the Streamlit deploy
-├── README.md                 # user-facing docs
-└── DOCUMENTATION.md          # this file
+Needs Python 3.9 or newer. Everything else (the India boundaries, all the map
+tools) comes with it — nothing else to download.
+
+---
+
+## Three ways to use it
+
+All three do the same thing under the hood:
+
+| You want to… | Use this |
+|---|---|
+| Write Python | `AdarvMap("data.csv").build().save("map.html")` |
+| Use the command line | `adarvmap data.csv -o map.html` |
+| Be guided step by step | `adarvmap` (no arguments) — or `adarvmap.run()` in Python |
+
+---
+
+## Python: all the options
+
+The one thing to know: create an `AdarvMap`, call `.build()`, then `.save()`.
+
+```python
+from adarvmap import AdarvMap
+
+AdarvMap("my_data.csv").build().save("map.html")
 ```
 
-There are three independent entry points, all of which converge on the
-`AdarvMap` class:
+`data` can be a file path (CSV, Excel, or TSV) **or** a pandas DataFrame.
+Everything else is optional — AdarvMap figures it out from your data. Pass an
+option only when you want to override what it guessed:
 
-| Entry point | Audience | Lives in |
+| Option | What it does | Default |
 |---|---|---|
-| `AdarvMap(...).build().save(...)` | Python developers | `map_builder.py` |
-| `adarvmap <csv> -o out.html` | command-line users | `cli.py` |
-| `adarvmap_run()` / `streamlit run app.py` | non-coders | `interactive.py` / `app.py` |
+| `lat_col` | Name of your latitude column | auto-detected |
+| `long_col` | Name of your longitude column | auto-detected |
+| `outcome_col` | The column that splits your data into groups | auto-detected |
+| `case_value` | Which value in that column is the main group | auto-detected |
+| `case_label` | What to call the main group on the map | the value from your data (e.g. `"Dead"`) |
+| `control_label` | What to call the other group | the other value (e.g. `"Alive"`) |
+| `all_cases` | Treat every row as a case (no second group) | `False` |
+| `case_color` | Colour of the main-group pins | ADARV red |
+| `control_color` | Colour of the other-group pins | ADARV blue |
+| `cluster_color` | Colour of the dot-density bubbles | ADARV red |
+| `state_shp` / `district_shp` | Use your own boundary files | the built-in India ones |
+
+**A fuller example:**
+```python
+from adarvmap import AdarvMap
+
+AdarvMap(
+    "cases.csv",
+    outcome_col="sex",       # split the map by this column
+    case_value="male",       # males are the highlighted group
+    case_color="#D55757",
+    control_color="#7676E7",
+).build().save("map.html")
+```
+
+**Getting the map object** (if you want to customise it further with Folium):
+```python
+m = AdarvMap("data.csv").build()
+m.save("map.html")
+folium_map = m.map          # the underlying folium.Map
+```
+`.save()` will complain if you call it before `.build()`.
 
 ---
 
-## 3. The build pipeline
+## Command line
 
-`AdarvMap.build()` ([adarvmap/map_builder.py](adarvmap/map_builder.py)) runs the
-whole pipeline and stores the Folium map on `self._map`. It returns `self` so
-calls chain: `AdarvMap(data).build().save("map.html")`.
+```bash
+adarvmap data.csv -o map.html
+```
+Run `adarvmap` with **no arguments** to get the guided step-by-step wizard.
 
-```
-data (path or DataFrame)
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 1. load_csv()                loader.py         │
-│    • read CSV / Excel / TSV                     │
-│    • auto-detect lat / lon columns             │
-│    • coerce coords to numeric, drop bad rows   │
-│    • auto-detect outcome column + case value   │
-│    → df, lat_col, long_col, outcome_col,       │
-│      case_value                                │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 2. load_boundaries()         spatial.py        │
-│    • read bundled / custom state & district    │
-│      polygons, reproject to WGS84, make valid  │
-│    → states, districts, name columns           │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 3. spatial_join()            spatial.py        │
-│    • point-in-polygon: attach state & district │
-│      name to every point                       │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 4. split cases / controls    map_builder.py    │
-│    mask = _adarvmap_outcome_norm == case_value  │
-│    (raises NoCasePointsError if no cases)       │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 5. determine_mode() + crop   spatial.py        │
-│    • pick districts / states / india zoom      │
-│    • crop boundary layers to data bbox+margin  │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────┐
-│ 6–9. render                  layers/sidebar.py │
-│    • init folium.Map, fit_bounds to target     │
-│    • add boundary GeoJson layers               │
-│    • add cluster + case/control pin layers     │
-│    • inject sidebar HTML/CSS/JS                 │
-└───────────────────────────────────────────────┘
-        │
-        ▼
-   self._map  →  .save(path)
-```
+| Flag | Meaning |
+|---|---|
+| `-o`, `--output` | Where to save the HTML (default: a dated name like `adarvmap_200926.html`) |
+| `--lat-col` / `--lon-col` | Latitude / longitude column names |
+| `--outcome-col` / `--case-value` | Grouping column and its main value |
+| `--case-color` / `--control-color` / `--cluster-color` | Marker colours (hex) |
+| `--state-shp` / `--district-shp` | Your own boundary files |
 
 ---
 
-## 4. Module reference
+## Your data
 
-### `loader.py` — reading & auto-detection
-- **`load_csv(data, lat_col, long_col, outcome_col, case_value)`** is the entry.
-  Accepts a path (`.csv`, `.xlsx/.xls/.xlsm/.xlsb/.ods`, `.tsv/.txt`) **or** a
-  `pandas.DataFrame`. Strips column-name whitespace, coerces coordinates to
-  numeric, and **drops rows** with missing / out-of-range coordinates (with a
-  `UserWarning`). Raises `ValueError` if the data is empty or every row is
-  invalid.
-- **Coordinate detection** (`detect_lat_lon`): if the user supplies both column
-  names they are validated; otherwise it looks for a combined `"lat,lon"` column
-  (`_is_pair_col` / `_detect_from_combined`), then for separately named numeric
-  columns (matching `_LAT_NAMES` / `_LON_NAMES`), then falls back to "the only
-  two numeric columns". A combined column is split into hidden
-  `_adarvmap_auto_lat` / `_adarvmap_auto_lon` columns, disambiguating lat vs. lon
-  by magnitude (anything with |value| > 90 must be longitude).
-- **Outcome detection** (`detect_outcome`): searches column names against
-  `_OUTCOME_CANDIDATES`; picks the case value from `_CASE_VALUES`
-  (`case`, `1`, `yes`, `true`, `positive`, …) or defaults to the first value.
-  The returned `case_value` is normalised to lowercase.
-- A **sanity check** warns (does not fail) if fewer than half the points fall
-  inside India's bounding box (lat 6–38, lon 67–98) — usually a sign of swapped
-  lat/lon columns.
+Each **row** is one person or event. At a minimum you need **location**, and
+usually a **grouping** column:
 
-> **Note on naming:** the canonical Python keyword for longitude is
-> **`long_col`** everywhere in the package API. The CLI flag is spelled
-> `--lon-col` and is mapped to `long_col` inside `cli.py`. See §7.
+| Need | How to provide it |
+|---|---|
+| Coordinates | Separate `lat` and `lon` columns, **or** one `"lat,lon"` column |
+| Grouping (optional) | A column like `outcome`, `status`, or `case_control` with two values |
 
-### `spatial.py` — geometry
-- **`load_boundaries`** reads the bundled FlatGeobuf files (or custom paths),
-  ensures WGS84 (EPSG:4326) and valid geometries, and resolves the name column
-  from a list of candidates (`ST_NM`, `STATE`, `dtname`, …) so it tolerates
-  different shapefile schemas.
-- **`spatial_join`** builds `shapely` points from the coordinates and does two
-  left `sjoin`s (district, then state) with `predicate="within"`, de-duplicating
-  on index. `_get_col_safe` handles the `_shp`-suffixed column names that
-  GeoPandas produces on join collisions.
-- **`determine_mode`** chooses the zoom target: ≤ `count_cutoff` affected
-  districts → `"districts"`; many states → `"india"`; otherwise `"states"`. It
-  also returns the case-point bounding box used for cropping and `fit_bounds`.
-- **`crop_geodataframe`** trims boundary layers to the data bbox plus
-  `margin_deg`, keeping the file small; it returns the original frame if the crop
-  would be empty.
+AdarvMap recognises common column names automatically (`lat`, `latitude`;
+`lon`, `long`, `longitude`; `outcome`, `status`, `case_control`, …). If a point
+looks misplaced, the usual cause is latitude and longitude being swapped —
+AdarvMap warns you when most points fall outside India.
 
-### `layers.py` — Folium rendering
-- **`add_boundary_layers`** adds three non-interactive `GeoJson` overlays: India
-  outline, affected states, affected districts.
-- **`add_marker_layers`** builds the `MarkerCluster` (dot density) plus two
-  `FeatureGroup`s for case and control pins, and returns the three layers so the
-  sidebar JS can reference them by Leaflet variable name. `_cluster_icon_fn`
-  emits the JavaScript that colours each cluster bubble by case fraction.
-
-### `sidebar.py` — the control panel
-A single function, **`build_sidebar_html`**, returns an f-string of
-HTML + CSS + JS that is injected into the map root. It wires up the
-dots/pins toggle, live colour pickers, pin-size slider, legend, and the
-PNG/print export (via `leaflet-simple-map-screenshoter`). It references the
-Leaflet objects by the names returned from `add_marker_layers` and
-`map.get_name()`.
-
-### `map_builder.py` — orchestration
-The **`AdarvMap`** class holds configuration and runs the pipeline. Key options:
-`state_shp` / `district_shp` (custom boundaries), `lat_col` / `long_col` /
-`outcome_col` / `case_value` (override auto-detection), `count_cutoff` (zoom
-threshold), `margin_deg` (crop padding), and the three colour overrides.
-`.save()` raises `RuntimeError` if called before `.build()`.
-
-### `cli.py` — console script
-Argparse front-end registered as the `adarvmap` entry point in
-`pyproject.toml`. Every error is caught and printed to stderr with exit code 1.
-
-### `interactive.py` — terminal wizard
-**`adarvmap_run(output_path)`** is a friendly, retry-on-error prompt flow for
-non-coders: load file → pick columns → pick the case value (with value-count
-bars) → build. `run_interactive` is a **deprecated alias** kept for backward
-compatibility (emits `DeprecationWarning`).
-
-### `exceptions.py`
-```
-AdarvMapError
-├── ColumnNotFoundError   # lat/lon/outcome column can't be found or is invalid
-└── NoCasePointsError     # no rows match the chosen case value
+**Example:**
+```csv
+latitude,longitude,outcome
+28.6,77.2,case
+19.0,72.8,control
 ```
 
 ---
 
-## 5. Public API surface
+## Naming the two groups
 
-Exported from `adarvmap/__init__.py`:
+Your grouping column can be anything with two values — `case`/`control`,
+`male`/`female`, `dead`/`alive`, `positive`/`negative`. The map automatically
+uses **your data's own words** in the legend, pop-ups, and menu. You only need
+`case_label` / `control_label` if you want to display different names than the
+values in your file.
 
-| Name | Kind | Notes |
+---
+
+## Using your own boundaries
+
+The India state and district boundaries are built in. To use your own instead:
+```python
+AdarvMap(
+    "cases.csv",
+    state_shp="path/to/states.shp",
+    district_shp="path/to/districts.shp",
+).build().save("map.html")
+```
+Shapefiles and GeoPackages both work; AdarvMap finds the name column for you.
+
+---
+
+## Errors you might see
+
+| Error | What it means | What to do |
 |---|---|---|
-| `AdarvMap` | class | main entry point |
-| `adarvmap_run` | function | interactive terminal wizard |
-| `run_interactive` | function | **deprecated** alias of `adarvmap_run` |
-| `AdarvMapError` | exception | base class |
-| `ColumnNotFoundError` | exception | |
-| `NoCasePointsError` | exception | |
+| `ColumnNotFoundError` | It couldn't find your latitude, longitude, or grouping column | Pass the column name explicitly (e.g. `lat_col="Latitude"`) |
+| `NoCasePointsError` | No rows matched the value you chose as the main group | Check `case_value` matches a value in your column |
+| `ValueError: empty` | The file had no rows (or all rows had bad coordinates) | Check the file loaded correctly |
 
 ---
 
-## 6. Dependencies & data
+## How it works (in plain English)
 
-Runtime deps (`pyproject.toml`): `folium`, `geopandas`, `numpy`, `pandas`,
-`shapely`, `openpyxl` (Excel support). `app.py` additionally needs `streamlit`.
-Python ≥ 3.9.
+When you call `.build()`, AdarvMap:
 
-Boundary data ships inside the wheel under `adarvmap/data/` as FlatGeobuf
-(`.fgb`) files, so no shapefile setup is required by the user. `load_boundaries`
-sets `SHAPE_RESTORE_SHX=YES` for resilience when custom shapefiles are passed.
+1. **Reads your file** and finds the latitude, longitude, and grouping columns
+   (dropping any rows with bad coordinates).
+2. **Places each row on the map of India** and works out which state and
+   district it falls in.
+3. **Splits the rows into two groups** based on your grouping column.
+4. **Zooms to the right level** — one district, a few states, or all of India —
+   depending on how spread out your data is.
+5. **Draws everything**: the boundaries, the coloured pins (or clustered
+   "dot-density" bubbles), and the sidebar of controls.
 
----
-
-## 7. Bug fixed in this pass
-
-**CLI was completely broken — keyword-argument mismatch.**
-
-`cli.py` constructed `AdarvMap(..., lon_col=args.lon_col, ...)`, but the
-`AdarvMap.__init__` keyword is `long_col` (keyword-only). Every CLI invocation
-therefore crashed before producing a map:
-
-```
-Error: AdarvMap.__init__() got an unexpected keyword argument 'lon_col'.
-Did you mean 'long_col'?
-```
-
-**Fix:** map the `--lon-col` argument to the correct keyword in
-[adarvmap/cli.py](adarvmap/cli.py):
-
-```diff
--            lon_col=args.lon_col,
-+            long_col=args.lon_col,
-```
-
-The `README.md` Python-API reference was also updated from `lon_col=None` to
-`long_col=None` to match the real signature. The Python API, Streamlit app, and
-interactive wizard were already passing `long_col` correctly and were
-unaffected.
-
-Verified after the fix: `adarvmap data.csv -o map.html` and the explicit
-`--lat-col/--lon-col/--case-value` form both produce maps; combined-column and
-`y`/`x` auto-detection paths also build successfully.
+The result is one self-contained HTML file. All the buttons on it (switching
+modes, changing colours, saving a PNG) run in the viewer's browser — there's no
+server involved. (It does need internet to load the grey background map.)
 
 ---
 
-## 8. Gaps / good next steps
+## For contributors
 
-- **No automated tests.** `tests/` contains only an empty `__init__.py`. The
-  CLI regression above would have been caught by one end-to-end test. Worth
-  adding `pytest` cases for: CLI smoke test, combined-column detection,
-  lat/lon swap warning, and `NoCasePointsError`.
-- **Naming consistency.** Consider accepting `lon_col` as an alias for
-  `long_col` in `AdarvMap.__init__` so the public kwarg matches the common
-  ecosystem spelling and the `--lon-col` flag.
-- **`dist/` artifacts** for old versions (0.1.10–0.1.12) are checked into the
-  working tree; consider `.gitignore`-ing `dist/`.
+The package is organised into small, single-job files:
+
+| File | Job |
+|---|---|
+| `map_builder.py` | The `AdarvMap` class — runs the whole process |
+| `loader.py` | Reads files, auto-detects columns |
+| `spatial.py` | Boundaries, matching points to districts, zoom level |
+| `layers.py` | Draws the pins and clusters |
+| `sidebar.py` | Builds the map's control panel (HTML/CSS/JS) |
+| `interactive.py` | The step-by-step wizard |
+| `cli.py` | The `adarvmap` command |
+| `data/` | The built-in India boundary files |
+
+**Tests** live in `tests/` — run them with `pytest`. They also run automatically
+on every push via GitHub Actions (see `.github/workflows/`). If you change how
+maps are generated, please add a test.
+
+---
+
+MIT © ADARV
