@@ -1,30 +1,30 @@
-"""adarvmap — Interactive epidemiological spot maps for India."""
+"""adarvmaps — Interactive epidemiological spot maps for India."""
 
-from .exceptions import ColumnNotFoundError, NoCasePointsError, AdarvMapError
-from .interactive import run_interactive, adarvmap_run
-from .map_builder import AdarvMap
+from .exceptions import ColumnNotFoundError, NoCasePointsError, AdarvMapsError
+from .interactive import run_interactive, adarvmaps_run
+from .map_builder import AdarvMaps
 
-# Short, friendly alias so non-coders can simply do:  import adarvmap; adarvmap.run()
-run = adarvmap_run
+# Short, friendly alias so non-coders can simply do:  import adarvmaps; adarvmaps.run()
+run = adarvmaps_run
 
 __version__ = "0.1.42"
 __all__ = [
-    "AdarvMap",
-    "run",  # friendly alias for adarvmap_run
-    "adarvmap_run",
+    "AdarvMaps",
+    "run",  # friendly alias for adarvmaps_run
+    "adarvmaps_run",
     "run_interactive",  # deprecated alias, kept for backward compat
-    "AdarvMapError",
+    "AdarvMapsError",
     "ColumnNotFoundError",
     "NoCasePointsError",
 ]
 
 _BANNER = (
     "\n"
-    "Interactive AdarvMap for India - created by ADARV\n"
+    "Interactive AdarvMaps for India - created by ADARV\n"
     "\n"
     "No code required! To build your map, just run:\n"
     "\n"
-    "adarvmap.run()\n"
+    "adarvmaps.run()\n"
     "\n"
     "You'll be asked to choose your data file, then your map appears.\n"
 )
@@ -48,9 +48,9 @@ def _show_banner() -> None:
     """Show the first-run hint for non-coders.
 
     Written to **stderr**, and only in an interactive session, so that
-    importing adarvmap never pollutes piped or redirected stdout (which
+    importing adarvmaps never pollutes piped or redirected stdout (which
     would corrupt scripts that emit CSV/JSON).  This mirrors R's
-    ``packageStartupMessage`` behaviour in the sibling adarvmapr package.
+    ``packageStartupMessage`` behaviour in the sibling adarvmapsr package.
     """
     import sys
 

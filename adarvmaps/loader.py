@@ -94,9 +94,9 @@ def detect_lat_lon(df: pd.DataFrame, lat_col: str = None, long_col: str = None):
     for col in cols:
         if _is_pair_col(df, col):
             lat_s, lon_s = _detect_from_combined(df, col)
-            df["_adarvmap_auto_lat"] = lat_s
-            df["_adarvmap_auto_lon"] = lon_s
-            return "_adarvmap_auto_lat", "_adarvmap_auto_lon"
+            df["_adarvmaps_auto_lat"] = lat_s
+            df["_adarvmaps_auto_lon"] = lon_s
+            return "_adarvmaps_auto_lat", "_adarvmaps_auto_lon"
 
     # Separate numeric columns
     numeric_cols = [c for c in cols if _is_float_col(df, c)]
@@ -242,14 +242,14 @@ def load_csv(
 
     # Cases-only mode: skip outcome detection, treat every row as a case.
     if all_cases:
-        outcome_col = "_adarvmap_outcome_norm"
+        outcome_col = "_adarvmaps_outcome_norm"
         case_value = "case"
-        df["_adarvmap_outcome_norm"] = "case"
+        df["_adarvmaps_outcome_norm"] = "case"
         return df, lat_col, long_col, outcome_col, case_value
 
     outcome_col, case_value = detect_outcome(df, outcome_col, case_value)
 
-    df["_adarvmap_outcome_norm"] = (
+    df["_adarvmaps_outcome_norm"] = (
         df[outcome_col].astype(str).str.strip().str.lower().replace({"nan": np.nan})
     )
 

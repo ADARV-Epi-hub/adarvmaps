@@ -1,6 +1,6 @@
-# AdarvMap — Reference
+# AdarvMaps — Reference
 
-This is the full reference for developers using **adarvmap** in Python or from
+This is the full reference for developers using **adarvmaps** in Python or from
 the command line. If you just want to make a map without writing code, start
 with the [README](README.md) instead.
 
@@ -20,7 +20,7 @@ with the [README](README.md) instead.
 ## Install
 
 ```bash
-pip install adarvmap
+pip install adarvmaps
 ```
 Needs Python 3.9 or newer. Everything else (the India boundaries, all the map
 tools) comes with it — nothing else to download.
@@ -33,24 +33,24 @@ All three do the same thing under the hood:
 
 | You want to… | Use this |
 |---|---|
-| Write Python | `AdarvMap("data.csv").build().save("map.html")` |
-| Use the command line | `adarvmap data.csv -o map.html` |
-| Be guided step by step | `adarvmap` (no arguments) — or `adarvmap.run()` in Python |
+| Write Python | `AdarvMaps("data.csv").build().save("map.html")` |
+| Use the command line | `adarvmaps data.csv -o map.html` |
+| Be guided step by step | `adarvmaps` (no arguments) — or `adarvmaps.run()` in Python |
 
 ---
 
 ## Python: all the options
 
-The one thing to know: create an `AdarvMap`, call `.build()`, then `.save()`.
+The one thing to know: create an `AdarvMaps`, call `.build()`, then `.save()`.
 
 ```python
-from adarvmap import AdarvMap
+from adarvmaps import AdarvMaps
 
-AdarvMap("my_data.csv").build().save("map.html")
+AdarvMaps("my_data.csv").build().save("map.html")
 ```
 
 `data` can be a file path (CSV, Excel, or TSV) **or** a pandas DataFrame.
-Everything else is optional — AdarvMap figures it out from your data. Pass an
+Everything else is optional — AdarvMaps figures it out from your data. Pass an
 option only when you want to override what it guessed:
 
 | Option | What it does | Default |
@@ -69,9 +69,9 @@ option only when you want to override what it guessed:
 
 **A fuller example:**
 ```python
-from adarvmap import AdarvMap
+from adarvmaps import AdarvMaps
 
-AdarvMap(
+AdarvMaps(
     "cases.csv",
     outcome_col="sex",       # split the map by this column
     case_value="male",       # males are the highlighted group
@@ -82,7 +82,7 @@ AdarvMap(
 
 **Getting the map object** (if you want to customise it further with Folium):
 ```python
-m = AdarvMap("data.csv").build()
+m = AdarvMaps("data.csv").build()
 m.save("map.html")
 folium_map = m.map          # the underlying folium.Map
 ```
@@ -93,13 +93,13 @@ folium_map = m.map          # the underlying folium.Map
 ## Command line
 
 ```bash
-adarvmap data.csv -o map.html
+adarvmaps data.csv -o map.html
 ```
-Run `adarvmap` with **no arguments** to get the guided step-by-step wizard.
+Run `adarvmaps` with **no arguments** to get the guided step-by-step wizard.
 
 | Flag | Meaning |
 |---|---|
-| `-o`, `--output` | Where to save the HTML (default: a dated name like `adarvmap_200926.html`) |
+| `-o`, `--output` | Where to save the HTML (default: a dated name like `adarvmaps_200926.html`) |
 | `--lat-col` / `--lon-col` | Latitude / longitude column names |
 | `--outcome-col` / `--case-value` | Grouping column and its main value |
 | `--case-color` / `--control-color` / `--cluster-color` | Marker colours (hex) |
@@ -117,10 +117,10 @@ usually a **grouping** column:
 | Coordinates | Separate `lat` and `lon` columns, **or** one `"lat,lon"` column |
 | Grouping (optional) | A column like `outcome`, `status`, or `case_control` with two values |
 
-AdarvMap recognises common column names automatically (`lat`, `latitude`;
+AdarvMaps recognises common column names automatically (`lat`, `latitude`;
 `lon`, `long`, `longitude`; `outcome`, `status`, `case_control`, …). If a point
 looks misplaced, the usual cause is latitude and longitude being swapped —
-AdarvMap warns you when most points fall outside India.
+AdarvMaps warns you when most points fall outside India.
 
 **Example:**
 ```csv
@@ -145,13 +145,13 @@ values in your file.
 
 The India state and district boundaries are built in. To use your own instead:
 ```python
-AdarvMap(
+AdarvMaps(
     "cases.csv",
     state_shp="path/to/states.shp",
     district_shp="path/to/districts.shp",
 ).build().save("map.html")
 ```
-Shapefiles and GeoPackages both work; AdarvMap finds the name column for you.
+Shapefiles and GeoPackages both work; AdarvMaps finds the name column for you.
 
 ---
 
@@ -167,7 +167,7 @@ Shapefiles and GeoPackages both work; AdarvMap finds the name column for you.
 
 ## How it works (in plain English)
 
-When you call `.build()`, AdarvMap:
+When you call `.build()`, AdarvMaps:
 
 1. **Reads your file** and finds the latitude, longitude, and grouping columns
    (dropping any rows with bad coordinates).
@@ -191,13 +191,13 @@ The package is organised into small, single-job files:
 
 | File | Job |
 |---|---|
-| `map_builder.py` | The `AdarvMap` class — runs the whole process |
+| `map_builder.py` | The `AdarvMaps` class — runs the whole process |
 | `loader.py` | Reads files, auto-detects columns |
 | `spatial.py` | Boundaries, matching points to districts, zoom level |
 | `layers.py` | Draws the pins and clusters |
 | `sidebar.py` | Builds the map's control panel (HTML/CSS/JS) |
 | `interactive.py` | The step-by-step wizard |
-| `cli.py` | The `adarvmap` command |
+| `cli.py` | The `adarvmaps` command |
 | `data/` | The built-in India boundary files |
 
 **Tests** live in `tests/` — run them with `pytest`. They also run automatically
