@@ -33,7 +33,7 @@ All three do the same thing under the hood:
 
 | You want to… | Use this |
 |---|---|
-| Write Python | `AdarvMaps("data.csv").build().save("map.html")` |
+| Write Python | `adarvmaps("data.csv").build().save("map.html")` |
 | Use the command line | `adarvmaps data.csv -o map.html` |
 | Be guided step by step | `adarvmaps` (no arguments) — or `adarvmaps.run()` in Python |
 
@@ -41,12 +41,13 @@ All three do the same thing under the hood:
 
 ## Python: all the options
 
-The one thing to know: create an `AdarvMaps`, call `.build()`, then `.save()`.
+The one thing to know: call `adarvmaps(...)`, then `.build()`, then `.save()`.
+(`adarvmaps` is a lowercase alias of the `AdarvMaps` class — either name works.)
 
 ```python
-from adarvmaps import AdarvMaps
+from adarvmaps import adarvmaps
 
-AdarvMaps("my_data.csv").build().save("map.html")
+adarvmaps("my_data.csv").build().save("map.html")
 ```
 
 `data` can be a file path (CSV, Excel, or TSV) **or** a pandas DataFrame.
@@ -69,9 +70,9 @@ option only when you want to override what it guessed:
 
 **A fuller example:**
 ```python
-from adarvmaps import AdarvMaps
+from adarvmaps import adarvmaps
 
-AdarvMaps(
+adarvmaps(
     "cases.csv",
     outcome_col="sex",       # split the map by this column
     case_value="male",       # males are the highlighted group
@@ -82,7 +83,7 @@ AdarvMaps(
 
 **Getting the map object** (if you want to customise it further with Folium):
 ```python
-m = AdarvMaps("data.csv").build()
+m = adarvmaps("data.csv").build()
 m.save("map.html")
 folium_map = m.map          # the underlying folium.Map
 ```
@@ -145,7 +146,7 @@ values in your file.
 
 The India state and district boundaries are built in. To use your own instead:
 ```python
-AdarvMaps(
+adarvmaps(
     "cases.csv",
     state_shp="path/to/states.shp",
     district_shp="path/to/districts.shp",
