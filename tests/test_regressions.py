@@ -125,6 +125,19 @@ def test_screenshoter_cdn_script_is_version_pinned():
 # Importing the package must not pollute stdout
 # --------------------------------------------------------------------------
 
+def test_lowercase_adarvmaps_alias_works():
+    """`from adarvmaps import adarvmaps` must work and be the AdarvMaps class.
+
+    Developers can use either the lowercase alias or the PascalCase class.
+    """
+    from adarvmaps import AdarvMaps, adarvmaps
+    assert adarvmaps is AdarvMaps
+    df = pd.DataFrame({"lat": [11.0, 28.6], "lon": [76.9, 77.2],
+                       "case_control": ["case", "control"]})
+    html = adarvmaps(df).build().map.get_root().render()
+    assert "toggleLabels" in html  # it really built a map
+
+
 def test_import_does_not_write_to_stdout():
     """The welcome banner must go to stderr, never stdout.
 

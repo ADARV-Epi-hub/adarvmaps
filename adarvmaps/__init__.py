@@ -7,9 +7,16 @@ from .map_builder import AdarvMaps
 # Short, friendly alias so non-coders can simply do:  import adarvmaps; adarvmaps.run()
 run = adarvmaps_run
 
-__version__ = "0.1.43"
+# Lowercase alias of the AdarvMaps class, so developers can also write
+#   from adarvmaps import adarvmaps
+#   adarvmaps("data.csv").build().save("map.html")
+# (AdarvMaps remains the canonical, PascalCase class name.)
+adarvmaps = AdarvMaps
+
+__version__ = "0.1.44"
 __all__ = [
     "AdarvMaps",
+    "adarvmaps",  # lowercase alias of AdarvMaps
     "run",  # friendly alias for adarvmaps_run
     "adarvmaps_run",
     "run_interactive",  # deprecated alias, kept for backward compat

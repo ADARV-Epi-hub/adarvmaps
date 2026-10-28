@@ -47,11 +47,17 @@ need to install anything on your computer, and you don't need to understand any 
 We will give you the template code, which you can copy and paste. After this, the package
 will guide you through the remaining steps with a few simple, plain-English questions.
 
-### Step 1 — Open a free notebook
+### Step 1 — Open a notebook
 
-Go to **[colab.research.google.com](https://colab.research.google.com)** and click
-**New notebook**. Google Colab is a free service that runs code in your web browser, so there
-is nothing to install on your computer. You'll see an empty box called a *cell*.
+**If you have nothing installed (easiest):** go to
+**[colab.research.google.com](https://colab.research.google.com)** and click **New notebook**.
+Google Colab is a free service that runs code in your web browser, so there is nothing to
+install on your computer. You'll see an empty box called a *cell*.
+
+**If you already use Python:** you can run the same two lines in **Jupyter Notebook, VS Code,
+JupyterLab**, or any Python setup on your own computer instead — just open a notebook or a
+Python prompt and go to Step 2. (Running it on your own computer also keeps your data
+entirely on your machine — nothing is uploaded anywhere.)
 
 ### Step 2 — Start AdarvMaps
 
@@ -150,10 +156,10 @@ pip install adarvmaps
 ### Step 2: Running the package
 
 ```python
-from adarvmaps import AdarvMaps
+from adarvmaps import adarvmaps
 
 # `data` accepts a CSV path or a pandas DataFrame
-AdarvMaps("my_data.csv").build().save("map.html")
+adarvmaps("my_data.csv").build().save("map.html")
 ```
 
 Or from the command line:
@@ -165,7 +171,7 @@ adarvmaps my_data.csv -o map.html
 A fuller example (overriding the automatic choices):
 
 ```python
-AdarvMaps(
+adarvmaps(
     "cases.csv",
     lat_col="Latitude",
     long_col="Longitude",
@@ -180,7 +186,7 @@ AdarvMaps(
 
 ### Common options
 
-`AdarvMaps(data, ...)` — all options below are keyword arguments:
+`adarvmaps(data, ...)` — all options below are keyword arguments (`AdarvMaps` also works):
 
 | Option | Default | Description |
 |---|---|---|
