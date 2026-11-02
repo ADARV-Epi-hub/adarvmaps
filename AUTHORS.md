@@ -7,8 +7,8 @@ AdarvMaps is developed and maintained by the **ADARV** team.
 | Muniraj Mallesan | Maintainer |
 | Dr. Sharan Murali | Team Lead |
 | Manikandan K | |
-| Shanmuga Sundharam | |
+| Dr. Shanmuga Sundharam P | |
 | Yogita Chaudhary | |
 | Barath U | |
 | Balaji S | |
-| Deepana R | |
+| Dr. Deepana R | |
