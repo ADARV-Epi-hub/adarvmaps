@@ -1,5 +1,3 @@
-.claude/
-
 # Python build / cache artifacts
 __pycache__/
 *.py[cod]
