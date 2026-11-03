@@ -233,11 +233,11 @@ AdarvMaps is developed by the **ADARV** team:
 1. **Muniraj Mallesan** (Maintainer)
 2. **Dr. Sharan Murali** (Team Lead)
 3. Manikandan K
-4. Shanmuga Sundharam
+4. Dr. Shanmuga Sundharam P
 5. Yogita Chaudhary
 6. Barath U
 7. Balaji S
-8. Deepana R
+8. Dr. Deepana R
 
 ## License
 
